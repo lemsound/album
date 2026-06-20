@@ -328,12 +328,12 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
   .album__stats{justify-content:center;}
   .controls{justify-content:center;flex-wrap:wrap;gap:10px;}
   .controls__share{margin-left:0;}
-  /* スマホだけ並び順: シャッフル・ループ・再生・歌詞・共有（PCはHTML順のまま） */
-  #shuffle{order:1;}
-  #loop{order:2;}
-  #playAll{order:3;}
-  #lyricsToggle{order:4;}
-  #share{order:5;}
+/* スマホだけ並び順: シャッフル・ループ・再生・歌詞・共有 */
+  .controls > :nth-child(2) { order: 1; } /* シャッフル */
+  .controls > :nth-child(3) { order: 2; } /* ループ */
+  .controls > :nth-child(1) { order: 3; } /* 再生（一番左にあったのを中央へ） */
+  .controls > :nth-child(4) { order: 4; } /* 歌詞 */
+  .controls > :nth-child(5) { order: 5; } /* 共有 */
   /* 指定サイズが大きくても画面内に収まるよう上限をかける */
   .album__title{font-size:var(--album-title-size-m, var(--album-title-size, clamp(2.2rem,10vw,3.2rem)));}
 
