@@ -137,22 +137,32 @@ async function init(){
     console.error(e);
     return;
   }
-  applyDesign();
-  buildTracks();
-  renderHeader();
-  renderList();
-  bindUI();
-  registerSW();
 
-  // 共有リンクで ?t=曲名 が指定されていたら、その曲を選んで表示
-  const want = new URLSearchParams(location.search).get('t');
-  if(want){
-    const idx = tracks.findIndex(t=> t.name === want);
-    if(idx >= 0){ select(idx, false); document.querySelectorAll('.track')[idx]?.scrollIntoView({block:'center'}); }
+  // 描画もまとめて保護：途中でつまずいても「読み込み中」で固まらせない
+  try{
+    applyDesign();
+    buildTracks();
+    renderHeader();
+    renderList();
+    bindUI();
+
+    // 共有リンクで ?t=曲名 が指定されていたら、その曲を選んで表示
+    const want = new URLSearchParams(location.search).get('t');
+    if(want){
+      const idx = tracks.findIndex(t=> t.name === want);
+      if(idx >= 0){ select(idx, false); document.querySelectorAll('.track')[idx]?.scrollIntoView({block:'center'}); }
+    }
+  }catch(e){
+    console.error(e);
+    // 古いキャッシュ等で画面構成が食い違ったとき、ここに来ることがある。
+    // selfHeal（index.html 側）が一度だけ掃除して再読み込みする。
+    $('loading').textContent = '表示の準備でつまずきました。数秒お待ちください…';
+    return;
   }
 
   $('loading').hidden = true;
   $('screen').hidden = false;
+  registerSW();   // 画面を出してから登録（初回描画を妨げない）
 }
 
 function applyDesign(){
@@ -176,6 +186,19 @@ function applyDesign(){
     root.setProperty('--album-title-size', v);
     root.setProperty('--album-title-size-m', `min(${v}, 11vw)`);
   }
+
+  // ファビコン（♪）を差し色で塗る
+  const accent = (design.colors['--accent'] && /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(design.colors['--accent']))
+                 ? design.colors['--accent'] : '#e8c45a';
+  setFavicon(accent);
+}
+
+function setFavicon(color){
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><text x="16" y="25" font-family="serif" font-size="28" text-anchor="middle" fill="${color}">♪</text></svg>`;
+  const href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+  let link = document.getElementById('favicon');
+  if(!link){ link = document.createElement('link'); link.rel = 'icon'; link.id = 'favicon'; document.head.appendChild(link); }
+  link.href = href;
 }
 
 function buildTracks(){
@@ -592,57 +615,59 @@ function toggleShuffle(){
 
 /* ---------- イベント結線 ---------- */
 function bindUI(){
-  $('playAll').addEventListener('click', ()=>{
+  const on = (id, ev, fn)=>{ const el = $(id); if(el) el.addEventListener(ev, fn); };
+
+  on('playAll','click', ()=>{
     if(cur >= 0 && isPlaying){ pause(); } else if(cur >= 0){ play(); } else { playAll(); }
   });
-  $('shuffle').addEventListener('click', toggleShuffle);
-  $('loop').addEventListener('click', cycleLoop);
-  $('share').addEventListener('click', share);
+  on('shuffle','click', toggleShuffle);
+  on('loop','click', cycleLoop);
+  on('share','click', share);
 
-  $('play').addEventListener('click', togglePlay);
-  $('next').addEventListener('click', ()=> next(false));
-  $('prev').addEventListener('click', prev);
-  $('lyricsToggle').addEventListener('click', ()=> $('lyrics').hidden ? openLyrics() : closeLyrics());
-  $('lyricsClose').addEventListener('click', closeLyrics);
+  on('play','click', togglePlay);
+  on('next','click', ()=> next(false));
+  on('prev','click', prev);
+  on('lyricsToggle','click', ()=> $('lyrics').hidden ? openLyrics() : closeLyrics());
+  on('lyricsClose','click', closeLyrics);
 
   // シーク（操作中は seeking=true にして、tick の上書きを止める）
   const seek = $('seek');
-  const previewSeek = ()=>{
-    if(cur < 0) return;
-    const sh = tracks[cur].shape;
-    $('cur').textContent = fmt(seek.value/1000 * sh.eff);
-    setSeek(seek.value);
-  };
-  const commitSeek = ()=>{
-    if(cur < 0){ seeking = false; return; }
-    const sh = tracks[cur].shape;
-    const P = seek.value/1000 * sh.eff;
-    setSeek(seek.value);
-    seekToP(P, isPlaying);
-    if(isPlaying) startRAF();
-    seeking = false;
-    seek.classList.remove('is-seeking');
-  };
-  const startSeek = ()=>{ seeking = true; seek.classList.add('is-seeking'); };
-  // 掴んだ瞬間（マウス／タッチ／ペン）
-  seek.addEventListener('pointerdown', startSeek);
-  seek.addEventListener('keydown', e=>{ if(/Arrow|Home|End|Page/.test(e.key)) startSeek(); });
-  // ドラッグ中は見た目だけ追従
-  seek.addEventListener('input', ()=>{ seeking = true; seek.classList.add('is-seeking'); previewSeek(); });
-  // 離したら確定（change はマウス／タッチ／キー共通で発火）
-  seek.addEventListener('change', commitSeek);
-  // 指やマウスを離したときの保険（change が来ないブラウザ対策）
-  seek.addEventListener('pointerup', ()=>{ if(seeking) commitSeek(); });
-  seek.addEventListener('pointercancel', ()=>{ if(seeking) commitSeek(); });
+  if(seek){
+    const previewSeek = ()=>{
+      if(cur < 0) return;
+      const sh = tracks[cur].shape;
+      $('cur').textContent = fmt(seek.value/1000 * sh.eff);
+      setSeek(seek.value);
+    };
+    const commitSeek = ()=>{
+      if(cur < 0){ seeking = false; return; }
+      const sh = tracks[cur].shape;
+      const P = seek.value/1000 * sh.eff;
+      setSeek(seek.value);
+      seekToP(P, isPlaying);
+      if(isPlaying) startRAF();
+      seeking = false;
+      seek.classList.remove('is-seeking');
+    };
+    const startSeek = ()=>{ seeking = true; seek.classList.add('is-seeking'); };
+    seek.addEventListener('pointerdown', startSeek);
+    seek.addEventListener('keydown', e=>{ if(/Arrow|Home|End|Page/.test(e.key)) startSeek(); });
+    seek.addEventListener('input', ()=>{ seeking = true; seek.classList.add('is-seeking'); previewSeek(); });
+    seek.addEventListener('change', commitSeek);
+    seek.addEventListener('pointerup', ()=>{ if(seeking) commitSeek(); });
+    seek.addEventListener('pointercancel', ()=>{ if(seeking) commitSeek(); });
+  }
 
   // 音量（色のfillも更新）
   const vol = $('vol');
-  const applyVol = ()=>{
-    audio.volume = parseFloat(vol.value);
-    vol.style.setProperty('--vp', (vol.value*100)+'%');
-  };
-  vol.addEventListener('input', applyVol);
-  applyVol();   // 初期fill
+  if(vol){
+    const applyVol = ()=>{
+      audio.volume = parseFloat(vol.value);
+      vol.style.setProperty('--vp', (vol.value*100)+'%');
+    };
+    vol.addEventListener('input', applyVol);
+    applyVol();   // 初期fill
+  }
 
   // キーボード
   document.addEventListener('keydown', e=>{
