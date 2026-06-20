@@ -35,30 +35,30 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
         /* Album Header */
         .album-header {
-            display: flex;
-            gap: 40px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 50px;
             margin-bottom: 50px;
             align-items: flex-end;
-            flex-wrap: wrap;
         }
 
         .album-art-container {
-            flex-shrink: 0;
+            position: relative;
         }
 
         .album-art {
-            width: 300px;
+            width: 100%;
             aspect-ratio: 1;
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             background-color: var(--bg-secondary);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8);
             display: none;
         }
 
@@ -73,31 +73,42 @@
         }
 
         .album-info {
-            flex: 1;
-            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            min-height: 300px;
         }
 
-        .album-metadata {
-            font-size: 0.9em;
+        .album-label {
+            font-size: 0.85em;
             color: var(--text-secondary);
-            margin-bottom: 10px;
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
 
         .album-title {
-            font-size: 3.5em;
+            font-size: 4em;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             word-break: break-word;
-            line-height: 1.1;
+            line-height: 1;
+        }
+
+        .album-metadata {
+            font-size: 0.95em;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
         .album-artist {
-            font-size: 1.1em;
+            font-size: 1em;
             color: var(--text-secondary);
-            margin-bottom: 20px;
             display: none;
         }
 
@@ -109,7 +120,7 @@
         .controls {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 16px;
             margin-bottom: 40px;
             flex-wrap: wrap;
         }
@@ -126,14 +137,14 @@
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             flex-shrink: 0;
             font-weight: bold;
         }
 
         .play-button-main:hover {
             background-color: var(--accent-hover);
-            transform: scale(1.05);
+            transform: scale(1.1);
         }
 
         .control-button {
@@ -160,7 +171,6 @@
         .control-button.active {
             border-color: var(--accent-color);
             color: var(--accent-color);
-            background-color: transparent;
         }
 
         .share-button {
@@ -169,7 +179,7 @@
 
         /* Progress */
         .progress-container {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .progress-bar {
@@ -178,7 +188,7 @@
             background-color: var(--bg-tertiary);
             border-radius: 3px;
             cursor: pointer;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             transition: height 0.2s ease;
             position: relative;
         }
@@ -198,22 +208,36 @@
         .time-display {
             display: flex;
             justify-content: space-between;
-            font-size: 0.85em;
+            font-size: 0.8em;
             color: var(--text-secondary);
         }
 
         /* Track List */
+        .track-list-header {
+            display: grid;
+            grid-template-columns: 50px 1fr 80px;
+            gap: 16px;
+            padding: 0 16px 12px;
+            border-bottom: 1px solid var(--bg-tertiary);
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .track-list {
             margin-bottom: 40px;
         }
 
         .track-item {
-            display: flex;
+            display: grid;
+            grid-template-columns: 50px 1fr 80px;
+            gap: 16px;
             align-items: center;
-            padding: 12px 16px;
+            padding: 8px 16px;
             cursor: pointer;
             transition: background-color 0.2s ease;
-            gap: 16px;
             border-radius: 8px;
             position: relative;
         }
@@ -222,9 +246,12 @@
             background-color: var(--bg-secondary);
         }
 
-        .track-item.playing .track-icon,
-        .track-item.playing .track-number {
+        .track-number-col {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
+            height: 56px;
         }
 
         .track-icon {
@@ -234,7 +261,8 @@
             background-color: var(--bg-secondary);
             overflow: hidden;
             flex-shrink: 0;
-            position: relative;
+            position: absolute;
+            inset: 0;
         }
 
         .track-icon img {
@@ -249,8 +277,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2em;
+            font-size: 0.95em;
             color: var(--text-secondary);
+            font-weight: 600;
         }
 
         .track-play-overlay {
@@ -259,11 +288,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.5);
             opacity: 0;
             transition: opacity 0.2s ease;
             border-radius: 8px;
-            font-size: 24px;
+            font-size: 20px;
             color: var(--accent-color);
         }
 
@@ -303,22 +332,16 @@
             50% { height: 100%; }
         }
 
-        .track-number {
-            font-size: 0.95em;
-            color: var(--text-secondary);
-            min-width: 40px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
         .track-info {
-            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
             min-width: 0;
         }
 
         .track-name {
             font-weight: 500;
-            margin-bottom: 4px;
+            font-size: 0.95em;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -326,7 +349,7 @@
         }
 
         .track-artist {
-            font-size: 0.85em;
+            font-size: 0.8em;
             color: var(--text-secondary);
             white-space: nowrap;
             overflow: hidden;
@@ -338,16 +361,18 @@
         }
 
         .track-duration {
-            font-size: 0.9em;
+            font-size: 0.85em;
             color: var(--text-secondary);
-            flex-shrink: 0;
-            min-width: 45px;
             text-align: right;
+        }
+
+        .track-item.playing .track-duration {
+            color: var(--accent-color);
         }
 
         /* Lyrics */
         .lyrics-container {
-            padding: 30px;
+            padding: 40px;
             background-color: var(--bg-secondary);
             border-radius: 12px;
             max-height: 60vh;
@@ -399,137 +424,67 @@
         }
 
         /* Responsive */
+        @media (max-width: 1200px) {
+            .album-header {
+                grid-template-columns: 250px 1fr;
+                gap: 40px;
+            }
+
+            .album-title {
+                font-size: 3em;
+            }
+        }
+
         @media (max-width: 900px) {
             .album-header {
+                grid-template-columns: 1fr;
                 gap: 30px;
+                margin-bottom: 40px;
+            }
+
+            .album-art-container {
+                max-width: 300px;
+                margin: 0 auto;
             }
 
             .album-art {
-                width: 250px;
+                width: 100%;
+            }
+
+            .album-info {
+                min-height: auto;
+                justify-content: flex-start;
             }
 
             .album-title {
                 font-size: 2.5em;
             }
 
-            .controls {
-                gap: 15px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 15px;
-            }
-
-            .album-header {
-                gap: 20px;
-                align-items: center;
-                flex-direction: column;
-            }
-
-            .album-art-container {
-                width: 100%;
-            }
-
-            .album-art {
-                width: 100%;
-                max-width: 280px;
-                margin: 0 auto;
-            }
-
-            .album-info {
-                text-align: center;
-                min-width: auto;
-            }
-
-            .album-title {
-                font-size: 2em;
-            }
-
-            .album-artist {
-                font-size: 1em;
-            }
-
-            .album-metadata {
-                justify-content: center;
-            }
-
-            .controls {
-                justify-content: center;
-                width: 100%;
-                gap: 15px;
-            }
-
-            .share-button {
-                margin-left: 0;
+            .track-list-header {
+                display: none;
             }
 
             .track-item {
-                padding: 10px 12px;
+                grid-template-columns: 50px 1fr 60px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .album-title {
+                font-size: 1.8em;
+            }
+
+            .album-metadata {
+                font-size: 0.85em;
                 gap: 12px;
             }
 
-            .track-icon {
-                width: 48px;
-                height: 48px;
-            }
-
-            .track-number {
-                min-width: 35px;
-            }
-
-            .track-duration {
-                min-width: 40px;
-            }
-
-            .lyrics-container {
-                padding: 20px;
-                max-height: 50vh;
-            }
-
-            .lyrics-content {
-                font-size: 0.95em;
-                line-height: 1.6;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .album-title {
-                font-size: 1.5em;
-            }
-
-            .album-metadata {
-                font-size: 0.85em;
-                gap: 10px;
-            }
-
-            .track-item {
-                padding: 8px 10px;
-                gap: 10px;
-            }
-
-            .track-icon {
-                width: 44px;
-                height: 44px;
-            }
-
-            .track-number {
-                font-size: 0.85em;
-                min-width: 30px;
-            }
-
-            .track-name {
-                font-size: 0.9em;
-            }
-
-            .track-artist {
-                font-size: 0.8em;
-            }
-
-            .track-duration {
-                font-size: 0.85em;
-                min-width: 35px;
+            .controls {
+                gap: 12px;
             }
 
             .play-button-main {
@@ -544,14 +499,41 @@
                 font-size: 16px;
             }
 
+            .track-number-col {
+                height: 48px;
+            }
+
+            .track-icon {
+                width: 48px;
+                height: 48px;
+            }
+
+            .track-item {
+                grid-template-columns: 48px 1fr 50px;
+                gap: 12px;
+                padding: 6px 12px;
+            }
+
+            .track-name {
+                font-size: 0.9em;
+            }
+
+            .track-artist {
+                font-size: 0.75em;
+            }
+
+            .track-duration {
+                font-size: 0.8em;
+            }
+
             .lyrics-container {
-                padding: 15px;
-                max-height: 45vh;
+                padding: 20px;
+                max-height: 50vh;
             }
 
             .lyrics-content {
                 font-size: 0.9em;
-                line-height: 1.5;
+                line-height: 1.6;
             }
         }
 
@@ -585,12 +567,14 @@
                 </div>
             </div>
             <div class="album-info">
-                <div class="album-metadata">
-                    <span id="releaseYear"></span>
-                    <span id="trackCount"></span>
-                    <span id="totalDuration"></span>
-                </div>
+                <div class="album-label">アルバム</div>
                 <div class="album-title" id="albumTitle">Loading...</div>
+                <div class="album-metadata">
+                    <span id="artistSpan"></span>
+                    <span id="yearSpan"></span>
+                    <span id="trackCountSpan"></span>
+                    <span id="durationSpan"></span>
+                </div>
                 <div class="album-artist" id="albumArtist"></div>
             </div>
         </div>
@@ -622,6 +606,13 @@
         <!-- Lyrics Container -->
         <div class="lyrics-container" id="lyricsContainer">
             <div class="lyrics-content" id="lyricsContent"></div>
+        </div>
+
+        <!-- Track List Header -->
+        <div class="track-list-header">
+            <span>#</span>
+            <span>タイトル</span>
+            <span>時間</span>
         </div>
 
         <!-- Track List -->
@@ -676,19 +667,16 @@
 
             async loadAlbumMetadata() {
                 try {
-                    // Try to get directory listing to find .album file
                     const dirResponse = await fetch('./');
                     if (dirResponse.ok) {
                         const html = await dirResponse.text();
                         
-                        // Parse directory to find .album file
                         const albumMatch = html.match(/href="([^"]+\.album)"/);
                         if (albumMatch) {
                             const fileName = albumMatch[1];
                             this.albumData.title = fileName.replace('.album', '');
                         }
                         
-                        // Parse directory to find .artist file
                         const artistMatch = html.match(/href="([^"]+\.artist)"/);
                         if (artistMatch) {
                             const fileName = artistMatch[1];
@@ -888,12 +876,14 @@
                 if (this.albumData.artist) {
                     artistEl.textContent = this.albumData.artist;
                     artistEl.classList.add('has-artist');
+                    document.getElementById('artistSpan').textContent = this.albumData.artist + ' ・ ';
                 } else {
                     artistEl.classList.remove('has-artist');
+                    document.getElementById('artistSpan').textContent = '';
                 }
 
-                document.getElementById('trackCount').textContent = `${this.tracks.length}曲`;
-                document.getElementById('totalDuration').textContent = this.formatTime(this.albumData.duration);
+                document.getElementById('trackCountSpan').textContent = `${this.tracks.length}曲`;
+                document.getElementById('durationSpan').textContent = `${Math.floor(this.albumData.duration / 60)}分${Math.round(this.albumData.duration % 60)}秒`;
 
                 const img = new Image();
                 img.onload = () => {
@@ -917,24 +907,28 @@
                     trackItem.setAttribute('data-index', i);
                     trackItem.onclick = () => this.playTrack(i);
 
-                    let iconHtml = '';
+                    let numberColHtml = '';
                     if (track.iconFile) {
-                        iconHtml = `
-                            <div class="track-icon">
-                                <img src="${track.iconFile}" alt="">
-                                <div class="track-play-overlay">⏸</div>
+                        numberColHtml = `
+                            <div class="track-number-col">
+                                <div class="track-icon">
+                                    <img src="${track.iconFile}" alt="">
+                                    <div class="track-play-overlay">⏸</div>
+                                </div>
                             </div>
                         `;
                     } else {
-                        iconHtml = `
-                            <div class="track-icon">
-                                <div class="track-icon-number">${i + 1}</div>
-                                <div class="track-play-overlay">▶</div>
+                        numberColHtml = `
+                            <div class="track-number-col">
+                                <div class="track-icon">
+                                    <div class="track-icon-number">${i + 1}</div>
+                                    <div class="track-play-overlay">▶</div>
+                                </div>
                             </div>
                         `;
                     }
 
-                    let html = iconHtml;
+                    let html = numberColHtml;
                     html += `
                         <div class="track-info">
                             <div class="track-name">${this.escapeHtml(track.name)}</div>
@@ -1118,9 +1112,9 @@
                 trackItems.forEach((item, index) => {
                     if (index === this.currentTrackIndex) {
                         item.classList.add('playing');
-                        const iconDiv = item.querySelector('.track-icon');
-                        if (iconDiv) {
-                            iconDiv.innerHTML = `
+                        const numberCol = item.querySelector('.track-number-col');
+                        if (numberCol && this.isPlaying) {
+                            numberCol.innerHTML = `
                                 <div class="waveform">
                                     <div class="waveform-bar"></div>
                                     <div class="waveform-bar"></div>
@@ -1129,20 +1123,43 @@
                                     <div class="waveform-bar"></div>
                                 </div>
                             `;
-                        }
-                        const overlay = item.querySelector('.track-play-overlay');
-                        if (overlay) {
-                            overlay.textContent = '⏸';
+                        } else if (numberCol && !this.isPlaying) {
+                            const track = this.tracks[index];
+                            if (track.iconFile) {
+                                numberCol.innerHTML = `
+                                    <div class="track-icon">
+                                        <img src="${track.iconFile}" alt="">
+                                        <div class="track-play-overlay">⏸</div>
+                                    </div>
+                                `;
+                            } else {
+                                numberCol.innerHTML = `
+                                    <div class="track-icon">
+                                        <div class="track-icon-number">${index + 1}</div>
+                                        <div class="track-play-overlay">⏸</div>
+                                    </div>
+                                `;
+                            }
                         }
                     } else {
                         item.classList.remove('playing');
-                        const iconDiv = item.querySelector('.track-icon');
-                        if (iconDiv) {
+                        const numberCol = item.querySelector('.track-number-col');
+                        if (numberCol) {
                             const track = this.tracks[index];
                             if (track.iconFile) {
-                                iconDiv.innerHTML = `<img src="${track.iconFile}" alt=""><div class="track-play-overlay">▶</div>`;
+                                numberCol.innerHTML = `
+                                    <div class="track-icon">
+                                        <img src="${track.iconFile}" alt="">
+                                        <div class="track-play-overlay">▶</div>
+                                    </div>
+                                `;
                             } else {
-                                iconDiv.innerHTML = `<div class="track-icon-number">${index + 1}</div><div class="track-play-overlay">▶</div>`;
+                                numberCol.innerHTML = `
+                                    <div class="track-icon">
+                                        <div class="track-icon-number">${index + 1}</div>
+                                        <div class="track-play-overlay">▶</div>
+                                    </div>
+                                `;
                             }
                         }
                     }
