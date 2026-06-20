@@ -464,7 +464,6 @@
     <script>
         class AlbumPlayer {
             constructor() {
-                this.albumPath = this.getAlbumPath();
                 this.tracks = [];
                 this.currentTrackIndex = 0;
                 this.isPlaying = false;
@@ -489,24 +488,45 @@
                 this.init();
             }
 
-            getAlbumPath() {
-                const parts = window.location.pathname.split('/').filter(p => p);
-                const lastPart = parts[parts.length - 1];
-                return lastPart && !lastPart.includes('.') ? lastPart : '';
-            }
-
             async init() {
                 try {
+                    await this.loadAlbumMetadata();
                     await this.loadConfig();
                     await this.applyConfig();
-                    await this.loadAlbumMetadata();
                     await this.loadTiming();
                     await this.loadTrackOrder();
+                    this.updatePageTitle();
                     this.setupEventListeners();
                     this.setupMediaSession();
                 } catch (e) {
                     console.error('Initialization error:', e);
                 }
+            }
+
+            async loadAlbumMetadata() {
+                try {
+                    // Load .album file
+                    const albumResponse = await fetch('.album');
+                    if (albumResponse.ok) {
+                        this.albumData.title = (await albumResponse.text()).trim();
+                    }
+
+                    // Load .artist file
+                    const artistResponse = await fetch('.artist');
+                    if (artistResponse.ok) {
+                        this.albumData.artist = (await artistResponse.text()).trim();
+                    }
+                } catch (e) {
+                    console.log('Error loading album metadata:', e);
+                }
+            }
+
+            updatePageTitle() {
+                let title = this.albumData.title || 'Album';
+                if (this.albumData.artist) {
+                    title += ` - ${this.albumData.artist}`;
+                }
+                document.title = title;
             }
 
             async loadConfig() {
@@ -560,32 +580,6 @@
                 }
             }
 
-            async loadAlbumMetadata() {
-                try {
-                    // Try loading .album file for title
-                    try {
-                        const albumResponse = await fetch('.album');
-                        if (albumResponse.ok) {
-                            const text = await albumResponse.text();
-                            this.albumData.title = text.trim();
-                        }
-                    } catch (e) {}
-
-                    // Try loading .artist file
-                    try {
-                        const artistResponse = await fetch('.artist');
-                        if (artistResponse.ok) {
-                            const text = await artistResponse.text();
-                            this.albumData.artist = text.trim();
-                        }
-                    } catch (e) {}
-
-                    this.updateAlbumDisplay();
-                } catch (e) {
-                    console.error('Error loading album metadata:', e);
-                }
-            }
-
             async loadTiming() {
                 try {
                     const response = await fetch('timing.txt');
@@ -634,6 +628,7 @@
 
                     await this.calculateAlbumDuration();
                     this.renderTrackList();
+                    this.updateAlbumDisplay();
                 } catch (e) {
                     console.error('Error loading track order:', e);
                 }
@@ -685,7 +680,7 @@
             }
 
             async calculateAlbumDuration() {
-                let loadedCount = 0;
+                let totalDuration = 0;
                 const promises = [];
 
                 for (const track of this.tracks) {
@@ -694,7 +689,7 @@
                         audio.onloadedmetadata = () => {
                             const timing = this.timingData[track.name] || { headTrim: 0, endTrim: 0 };
                             track.duration = Math.max(0, audio.duration + timing.endTrim - timing.headTrim);
-                            this.albumData.duration += track.duration;
+                            totalDuration += track.duration;
                             resolve();
                         };
                         audio.onerror = () => resolve();
@@ -704,7 +699,7 @@
                 }
 
                 await Promise.all(promises);
-                this.updateAlbumDisplay();
+                this.albumData.duration = totalDuration;
             }
 
             updateAlbumDisplay() {
