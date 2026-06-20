@@ -98,6 +98,11 @@
             font-size: 1.1em;
             color: var(--text-secondary);
             margin-bottom: 20px;
+            display: none;
+        }
+
+        .album-artist.has-artist {
+            display: block;
         }
 
         /* Controls */
@@ -671,14 +676,24 @@
 
             async loadAlbumMetadata() {
                 try {
-                    const albumResponse = await fetch('.album');
-                    if (albumResponse.ok) {
-                        this.albumData.title = (await albumResponse.text()).trim();
-                    }
-
-                    const artistResponse = await fetch('.artist');
-                    if (artistResponse.ok) {
-                        this.albumData.artist = (await artistResponse.text()).trim();
+                    // Try to get directory listing to find .album file
+                    const dirResponse = await fetch('./');
+                    if (dirResponse.ok) {
+                        const html = await dirResponse.text();
+                        
+                        // Parse directory to find .album file
+                        const albumMatch = html.match(/href="([^"]+\.album)"/);
+                        if (albumMatch) {
+                            const fileName = albumMatch[1];
+                            this.albumData.title = fileName.replace('.album', '');
+                        }
+                        
+                        // Parse directory to find .artist file
+                        const artistMatch = html.match(/href="([^"]+\.artist)"/);
+                        if (artistMatch) {
+                            const fileName = artistMatch[1];
+                            this.albumData.artist = fileName.replace('.artist', '');
+                        }
                     }
                 } catch (e) {
                     console.log('Error loading album metadata:', e);
@@ -872,8 +887,9 @@
                 const artistEl = document.getElementById('albumArtist');
                 if (this.albumData.artist) {
                     artistEl.textContent = this.albumData.artist;
+                    artistEl.classList.add('has-artist');
                 } else {
-                    artistEl.style.display = 'none';
+                    artistEl.classList.remove('has-artist');
                 }
 
                 document.getElementById('trackCount').textContent = `${this.tracks.length}曲`;
