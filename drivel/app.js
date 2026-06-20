@@ -565,22 +565,41 @@ function trackEnded(){
 /* ---------- 曲送り ---------- */
 function posInOrder(){ return order.indexOf(cur); }
 
-/* シャッフル時：今かかっている曲以外からランダムに1曲（直前の曲も避ける）*/
+/* ---------- シャッフル（シャッフルバッグ方式）----------
+   全曲をランダムな順に1巡ぶん並べ、それを消化。1巡終わるごとに引き直す。
+   こうすると全曲が均等に流れ、毎周回ちがう順になり、同じ曲が連続しない。 */
+let shuffleQueue = [];
 let shuffleHistory = [];
-function randomOther(){
-  const pool = tracks.map((_,i)=> i).filter(i=> tracks[i].playable && i !== cur);
-  if(!pool.length) return -1;
-  if(pool.length > 1 && shuffleHistory.length){
-    const last = shuffleHistory[shuffleHistory.length-1];
-    const p2 = pool.filter(i=> i !== last);
-    if(p2.length) return p2[Math.floor(Math.random()*p2.length)];
+
+function refillShuffleQueue(){
+  const pool = tracks.map((_,i)=> i).filter(i=> tracks[i].playable);
+  for(let i=pool.length-1; i>0; i--){               // Fisher-Yates
+    const j = Math.floor(Math.random()*(i+1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
   }
-  return pool[Math.floor(Math.random()*pool.length)];
+  // 今かかっている曲が次の周回の先頭に来ない（＝連続再生にならない）ように
+  if(pool.length > 1 && pool[0] === cur){
+    const k = 1 + Math.floor(Math.random()*(pool.length-1));
+    [pool[0], pool[k]] = [pool[k], pool[0]];
+  }
+  shuffleQueue = pool;
+}
+function nextShuffleIndex(){
+  const playable = tracks.filter(t=> t.playable).length;
+  if(playable <= 0) return -1;
+  if(playable === 1) return tracks.findIndex(t=> t.playable);
+  if(!shuffleQueue.length) refillShuffleQueue();
+  let n = shuffleQueue.shift();
+  if(n === cur){                                     // 念のため現在曲は飛ばす
+    if(shuffleQueue.length){ const m = shuffleQueue.shift(); shuffleQueue.push(n); n = m; }
+    else { refillShuffleQueue(); n = shuffleQueue.shift(); }
+  }
+  return (n != null && tracks[n] && tracks[n].playable) ? n : -1;
 }
 
 function next(auto){
   if(shuffleOn){
-    const n = randomOther();
+    const n = nextShuffleIndex();
     if(n >= 0){ if(cur >= 0) shuffleHistory.push(cur); select(n, true); return; }
     stopPlayback(); return;
   }
@@ -604,7 +623,7 @@ function prev(){
       const pv = shuffleHistory.pop();
       if(tracks[pv] && tracks[pv].playable){ select(pv, isPlaying || true); return; }
     }
-    const n = randomOther();
+    const n = nextShuffleIndex();
     if(n >= 0) select(n, isPlaying || true);
     return;
   }
@@ -618,14 +637,15 @@ function prev(){
 
 function playAll(){
   shuffleHistory = [];
-  rebuildOrder();
-  let first;
   if(shuffleOn){
-    const pool = tracks.map((_,i)=> i).filter(i=> tracks[i].playable);
-    first = pool.length ? pool[Math.floor(Math.random()*pool.length)] : null;
-  }else{
-    first = order.find(i=> tracks[i].playable);
+    shuffleQueue = [];
+    refillShuffleQueue();
+    const n = shuffleQueue.shift();
+    if(n != null) select(n, true);
+    return;
   }
+  rebuildOrder();
+  const first = order.find(i=> tracks[i].playable);
   if(first != null) select(first, true);
 }
 
@@ -860,6 +880,7 @@ function cycleLoop(){
 function toggleShuffle(){
   shuffleOn = !shuffleOn;
   shuffleHistory = [];
+  shuffleQueue = [];
   const b = $('shuffle');
   b.setAttribute('aria-pressed', String(shuffleOn));
   b.classList.toggle('is-active', shuffleOn);
