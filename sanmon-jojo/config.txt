@@ -1,0 +1,24 @@
+# Album Player Configuration File
+# カラーコード・フォント設定
+
+# 背景色（プライマリ・ダークなメイン背景）
+bgPrimary: #0a0a0a
+
+# 背景色（セカンダリ・アルバムヘッダーやトラックリスト背景）
+bgSecondary: #1a1a1a
+
+# アクセントカラー（再生ボタンやハイライト）
+# 月をイメージしたイエロー
+accentColor: #ffd700
+
+# アルバムタイトルのフォント
+# 'serif' または 'sans' を指定
+# serif: 日本語明朝体・アルファベットセリフ体
+# sans: 日本語ゴシック体・アルファベットサンセリフ体
+albumTitleFont: sans
+
+# 歌詞のフォント
+# 'serif' または 'sans' を指定
+# serif: 日本語明朝体・アルファベットセリフ体
+# sans: 日本語ゴシック体・アルファベットサンセリフ体
+lyricsFont: sans
