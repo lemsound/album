@@ -5,7 +5,7 @@
    ・Webフォント … cache-first
    キャッシュを作り直したいときは下の VERSION を変えてください。
    ========================================================= */
-const VERSION = 'sanmon-jojou-v6';
+const VERSION = 'sanmon-jojou-v7';
 
 const isMedia  = (u) => /\.(mp3|wav|m4a|ogg|jpg|jpeg|png|webp|gif|svg)$/i.test(u.pathname);
 const isFont   = (u) => /fonts\.(googleapis|gstatic)\.com$/i.test(u.hostname);

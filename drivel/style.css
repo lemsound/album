@@ -328,6 +328,12 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
   .album__stats{justify-content:center;}
   .controls{justify-content:center;flex-wrap:wrap;gap:10px;}
   .controls__share{margin-left:0;}
+  /* スマホだけ並び順: シャッフル・ループ・再生・歌詞・共有（PCはHTML順のまま） */
+  #shuffle{order:1;}
+  #loop{order:2;}
+  #playAll{order:3;}
+  #lyricsToggle{order:4;}
+  #share{order:5;}
   /* 指定サイズが大きくても画面内に収まるよう上限をかける */
   .album__title{font-size:var(--album-title-size-m, var(--album-title-size, clamp(2.2rem,10vw,3.2rem)));}
 
