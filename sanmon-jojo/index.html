@@ -13,11 +13,13 @@
         }
 
         :root {
-            --bg-primary: #0a0a0a;
+            --bg-primary: #0f0f0f;
             --bg-secondary: #1a1a1a;
+            --bg-tertiary: #282828;
             --text-primary: #ffffff;
-            --accent-color: #ffd700;
-            --subtle-gray: #2a2a2a;
+            --text-secondary: #b3b3b3;
+            --accent-color: #8bb4d4;
+            --accent-hover: #9cbfe8;
         }
 
         html {
@@ -33,27 +35,35 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
+        /* Album Header */
         .album-header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 30px 20px;
-            background-color: var(--bg-secondary);
-            border-radius: 8px;
+            display: flex;
+            gap: 40px;
+            margin-bottom: 50px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .album-art-container {
+            flex-shrink: 0;
         }
 
         .album-art {
-            width: 100%;
-            max-width: 300px;
-            margin: 0 auto 20px;
+            width: 300px;
             aspect-ratio: 1;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-            background-color: var(--subtle-gray);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            background-color: var(--bg-secondary);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            display: none;
+        }
+
+        .album-art.has-image {
+            display: block;
         }
 
         .album-art img {
@@ -62,101 +72,110 @@
             object-fit: cover;
         }
 
-        .album-title {
-            font-size: 3em;
-            font-weight: bold;
+        .album-info {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .album-metadata {
+            font-size: 0.9em;
+            color: var(--text-secondary);
             margin-bottom: 10px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .album-title {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
             word-break: break-word;
-            line-height: 1.2;
+            line-height: 1.1;
         }
 
         .album-artist {
-            font-size: 1.2em;
-            color: #aaa;
-            margin-bottom: 15px;
-            font-weight: 500;
+            font-size: 1.1em;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
         }
 
-        .album-info {
+        /* Controls */
+        .controls {
             display: flex;
-            justify-content: center;
+            align-items: center;
             gap: 20px;
-            flex-wrap: wrap;
-            font-size: 0.9em;
-            color: #999;
-        }
-
-        .album-info span {
-            display: inline-block;
-        }
-
-        .controls-wrapper {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             flex-wrap: wrap;
         }
 
-        .controls-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .button {
-            width: 50px;
-            height: 50px;
+        .play-button-main {
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
-            background-color: var(--subtle-gray);
+            background-color: var(--accent-color);
             border: none;
-            color: var(--text-primary);
+            color: var(--bg-primary);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+
+        .play-button-main:hover {
+            background-color: var(--accent-hover);
+            transform: scale(1.05);
+        }
+
+        .control-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: transparent;
+            border: 2px solid var(--text-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s ease;
             flex-shrink: 0;
         }
 
-        .button:hover {
-            background-color: var(--accent-color);
-            color: var(--bg-primary);
-            transform: scale(1.1);
+        .control-button:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
         }
 
-        .button.active {
-            background-color: var(--accent-color);
-            color: var(--bg-primary);
-        }
-
-        .play-button {
-            width: 60px;
-            height: 60px;
-            font-size: 28px;
+        .control-button.active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background-color: transparent;
         }
 
         .share-button {
-            flex-shrink: 0;
+            margin-left: auto;
         }
 
+        /* Progress */
         .progress-container {
             margin-bottom: 30px;
-            padding: 0 5px;
         }
 
         .progress-bar {
             width: 100%;
             height: 6px;
-            background-color: var(--subtle-gray);
+            background-color: var(--bg-tertiary);
             border-radius: 3px;
             cursor: pointer;
             margin-bottom: 10px;
             transition: height 0.2s ease;
+            position: relative;
         }
 
         .progress-bar:hover {
@@ -174,65 +193,117 @@
         .time-display {
             display: flex;
             justify-content: space-between;
-            font-size: 0.9em;
-            color: #999;
+            font-size: 0.85em;
+            color: var(--text-secondary);
         }
 
+        /* Track List */
         .track-list {
-            background-color: var(--bg-secondary);
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .track-item {
             display: flex;
             align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid var(--subtle-gray);
+            padding: 12px 16px;
             cursor: pointer;
             transition: background-color 0.2s ease;
-            gap: 15px;
-        }
-
-        .track-item:last-child {
-            border-bottom: none;
+            gap: 16px;
+            border-radius: 8px;
+            position: relative;
         }
 
         .track-item:hover {
-            background-color: var(--subtle-gray);
+            background-color: var(--bg-secondary);
         }
 
-        .track-item.active {
-            background-color: var(--subtle-gray);
-            color: var(--accent-color);
-        }
-
-        .track-number {
-            font-size: 0.9em;
-            color: #666;
-            min-width: 30px;
-            text-align: right;
-            flex-shrink: 0;
-        }
-
-        .track-item.active .track-number {
-            color: var(--accent-color);
+        .track-item.playing .track-icon,
+        .track-item.playing .track-number {
+            position: relative;
         }
 
         .track-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 4px;
-            background-color: var(--subtle-gray);
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            background-color: var(--bg-secondary);
             overflow: hidden;
             flex-shrink: 0;
+            position: relative;
         }
 
         .track-icon img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        .track-icon-number {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: var(--text-secondary);
+        }
+
+        .track-play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            border-radius: 8px;
+            font-size: 24px;
+            color: var(--accent-color);
+        }
+
+        .track-item:hover .track-play-overlay {
+            opacity: 1;
+        }
+
+        .track-item.playing .track-play-overlay {
+            opacity: 1;
+            background-color: transparent;
+        }
+
+        .waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            height: 100%;
+            width: 100%;
+        }
+
+        .waveform-bar {
+            width: 2px;
+            background-color: var(--accent-color);
+            border-radius: 1px;
+            animation: wave 0.6s ease-in-out infinite;
+        }
+
+        .waveform-bar:nth-child(1) { animation-delay: 0s; height: 20%; }
+        .waveform-bar:nth-child(2) { animation-delay: 0.1s; height: 40%; }
+        .waveform-bar:nth-child(3) { animation-delay: 0.2s; height: 60%; }
+        .waveform-bar:nth-child(4) { animation-delay: 0.1s; height: 40%; }
+        .waveform-bar:nth-child(5) { animation-delay: 0s; height: 20%; }
+
+        @keyframes wave {
+            0%, 100% { height: 20%; }
+            50% { height: 100%; }
+        }
+
+        .track-number {
+            font-size: 0.95em;
+            color: var(--text-secondary);
+            min-width: 40px;
+            text-align: center;
+            flex-shrink: 0;
         }
 
         .track-info {
@@ -246,17 +317,56 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: var(--text-primary);
+        }
+
+        .track-artist {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-item.playing .track-name {
+            color: var(--accent-color);
         }
 
         .track-duration {
-            font-size: 0.85em;
-            color: #999;
-            text-align: right;
+            font-size: 0.9em;
+            color: var(--text-secondary);
             flex-shrink: 0;
+            min-width: 45px;
+            text-align: right;
         }
 
-        .lyrics-section {
-            margin-top: 40px;
+        /* Lyrics */
+        .lyrics-container {
+            padding: 30px;
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            max-height: 60vh;
+            overflow-y: auto;
+            display: none;
+            margin-bottom: 30px;
+        }
+
+        .lyrics-container.active {
+            display: block;
+        }
+
+        .lyrics-content {
+            white-space: pre-wrap;
+            line-height: 1.8;
+            color: var(--text-primary);
+            font-size: 1em;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .lyrics-empty {
+            text-align: center;
+            color: var(--text-secondary);
         }
 
         .lyrics-toggle {
@@ -265,54 +375,67 @@
             margin-bottom: 20px;
         }
 
-        .lyrics-toggle button {
-            padding: 10px 20px;
-            background-color: var(--subtle-gray);
+        .lyrics-btn {
+            background-color: transparent;
             border: none;
-            color: var(--text-primary);
-            border-radius: 4px;
+            color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
+            font-size: 24px;
+            transition: color 0.2s ease;
+            padding: 8px;
         }
 
-        .lyrics-toggle button:hover {
-            background-color: var(--accent-color);
-            color: var(--bg-primary);
+        .lyrics-btn:hover {
+            color: var(--accent-color);
         }
 
-        .lyrics-container {
-            padding: 30px 20px;
-            background-color: var(--bg-secondary);
-            border-radius: 8px;
-            max-height: 500px;
-            overflow-y: auto;
-            display: none;
+        .lyrics-btn.active {
+            color: var(--accent-color);
         }
 
-        .lyrics-container.active {
-            display: block;
+        /* Responsive */
+        @media (max-width: 900px) {
+            .album-header {
+                gap: 30px;
+            }
+
+            .album-art {
+                width: 250px;
+            }
+
+            .album-title {
+                font-size: 2.5em;
+            }
+
+            .controls {
+                gap: 15px;
+            }
         }
 
-        .lyrics-title {
-            font-size: 1.4em;
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: var(--text-primary);
-        }
-
-        .lyrics-content {
-            white-space: pre-wrap;
-            line-height: 1.8;
-            color: #ccc;
-            font-size: 0.95em;
-            text-align: left;
-            word-break: break-word;
-        }
-
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             body {
-                padding: 10px;
+                padding: 15px;
+            }
+
+            .album-header {
+                gap: 20px;
+                align-items: center;
+                flex-direction: column;
+            }
+
+            .album-art-container {
+                width: 100%;
+            }
+
+            .album-art {
+                width: 100%;
+                max-width: 280px;
+                margin: 0 auto;
+            }
+
+            .album-info {
+                text-align: center;
+                min-width: auto;
             }
 
             .album-title {
@@ -323,81 +446,117 @@
                 font-size: 1em;
             }
 
-            .album-art {
-                max-width: 250px;
-            }
-
-            .controls-wrapper {
-                flex-direction: column;
-            }
-
-            .controls-container {
-                width: 100%;
+            .album-metadata {
                 justify-content: center;
             }
 
-            .share-button {
+            .controls {
+                justify-content: center;
                 width: 100%;
+                gap: 15px;
             }
 
-            .button {
-                width: 45px;
-                height: 45px;
-                font-size: 20px;
-            }
-
-            .play-button {
-                width: 55px;
-                height: 55px;
-                font-size: 24px;
-            }
-
-            .album-info {
-                gap: 10px;
-                font-size: 0.8em;
+            .share-button {
+                margin-left: 0;
             }
 
             .track-item {
-                padding: 12px;
-                gap: 10px;
-            }
-
-            .track-number {
-                min-width: 25px;
+                padding: 10px 12px;
+                gap: 12px;
             }
 
             .track-icon {
-                width: 35px;
-                height: 35px;
+                width: 48px;
+                height: 48px;
+            }
+
+            .track-number {
+                min-width: 35px;
+            }
+
+            .track-duration {
+                min-width: 40px;
             }
 
             .lyrics-container {
-                max-height: 400px;
                 padding: 20px;
-            }
-
-            .lyrics-title {
-                font-size: 1.1em;
-                margin-bottom: 15px;
+                max-height: 50vh;
             }
 
             .lyrics-content {
-                font-size: 0.9em;
+                font-size: 0.95em;
                 line-height: 1.6;
             }
         }
 
-        .hidden {
-            display: none;
+        @media (max-width: 480px) {
+            .album-title {
+                font-size: 1.5em;
+            }
+
+            .album-metadata {
+                font-size: 0.85em;
+                gap: 10px;
+            }
+
+            .track-item {
+                padding: 8px 10px;
+                gap: 10px;
+            }
+
+            .track-icon {
+                width: 44px;
+                height: 44px;
+            }
+
+            .track-number {
+                font-size: 0.85em;
+                min-width: 30px;
+            }
+
+            .track-name {
+                font-size: 0.9em;
+            }
+
+            .track-artist {
+                font-size: 0.8em;
+            }
+
+            .track-duration {
+                font-size: 0.85em;
+                min-width: 35px;
+            }
+
+            .play-button-main {
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+            }
+
+            .control-button {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+
+            .lyrics-container {
+                padding: 15px;
+                max-height: 45vh;
+            }
+
+            .lyrics-content {
+                font-size: 0.9em;
+                line-height: 1.5;
+            }
         }
 
-        /* スクロールバーのスタイリング */
+        /* Scrollbar */
         .lyrics-container::-webkit-scrollbar {
             width: 8px;
         }
 
         .lyrics-container::-webkit-scrollbar-track {
-            background: var(--subtle-gray);
+            background: var(--bg-tertiary);
             border-radius: 4px;
         }
 
@@ -407,34 +566,39 @@
         }
 
         .lyrics-container::-webkit-scrollbar-thumb:hover {
-            background: #ffed4e;
+            background: var(--accent-hover);
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Album Header -->
         <div class="album-header">
-            <div class="album-art">
-                <img id="albumArt" src="" alt="Album Cover">
+            <div class="album-art-container">
+                <div class="album-art" id="albumArtContainer">
+                    <img id="albumArt" src="" alt="Album Cover">
+                </div>
             </div>
-            <div class="album-title" id="albumTitle">Loading...</div>
-            <div class="album-artist" id="albumArtist"></div>
             <div class="album-info">
-                <span id="releaseYear"></span>
-                <span id="trackCount"></span>
-                <span id="totalDuration"></span>
+                <div class="album-metadata">
+                    <span id="releaseYear"></span>
+                    <span id="trackCount"></span>
+                    <span id="totalDuration"></span>
+                </div>
+                <div class="album-title" id="albumTitle">Loading...</div>
+                <div class="album-artist" id="albumArtist"></div>
             </div>
         </div>
 
-        <div class="controls-wrapper">
-            <div class="controls-container">
-                <button class="button play-button" id="playAllBtn" title="Play All">▶</button>
-                <button class="button" id="shuffleBtn" title="Shuffle">🔀</button>
-                <button class="button" id="loopBtn" title="Loop">🔁</button>
-            </div>
-            <button class="button share-button" id="shareBtn" title="Share">🔗</button>
+        <!-- Controls -->
+        <div class="controls">
+            <button class="play-button-main" id="playAllBtn" title="再生">▶</button>
+            <button class="control-button" id="shuffleBtn" title="シャッフル">🔀</button>
+            <button class="control-button" id="loopBtn" title="ループ">🔁</button>
+            <button class="control-button share-button" id="shareBtn" title="共有">🔗</button>
         </div>
 
+        <!-- Progress -->
         <div class="progress-container">
             <div class="progress-bar" id="progressBar">
                 <div class="progress-fill" id="progressFill"></div>
@@ -445,18 +609,18 @@
             </div>
         </div>
 
-        <div class="track-list" id="trackList"></div>
-
-        <div class="lyrics-section">
-            <div class="lyrics-toggle">
-                <button id="lyricsToggleBtn">歌詞を表示</button>
-            </div>
-
-            <div class="lyrics-container" id="lyricsContainer">
-                <div class="lyrics-title" id="lyricsTitle"></div>
-                <div class="lyrics-content" id="lyricsContent"></div>
-            </div>
+        <!-- Lyrics Toggle -->
+        <div class="lyrics-toggle">
+            <button class="lyrics-btn" id="lyricsToggleBtn" title="歌詞">📄</button>
         </div>
+
+        <!-- Lyrics Container -->
+        <div class="lyrics-container" id="lyricsContainer">
+            <div class="lyrics-content" id="lyricsContent"></div>
+        </div>
+
+        <!-- Track List -->
+        <div class="track-list" id="trackList"></div>
     </div>
 
     <audio id="audioPlayer"></audio>
@@ -468,7 +632,7 @@
                 this.currentTrackIndex = 0;
                 this.isPlaying = false;
                 this.isShuffle = false;
-                this.loopMode = 0; // 0: no loop, 1: album loop, 2: track loop
+                this.loopMode = 0;
                 this.albumData = {
                     title: '',
                     artist: '',
@@ -477,9 +641,11 @@
                 };
                 this.timingData = {};
                 this.config = {
-                    bgPrimary: '#0a0a0a',
+                    bgPrimary: '#0f0f0f',
                     bgSecondary: '#1a1a1a',
-                    accentColor: '#ffd700',
+                    bgTertiary: '#282828',
+                    accentColor: '#8bb4d4',
+                    accentHover: '#9cbfe8',
                     albumTitleFont: 'sans',
                     lyricsFont: 'sans'
                 };
@@ -505,13 +671,11 @@
 
             async loadAlbumMetadata() {
                 try {
-                    // Load .album file
                     const albumResponse = await fetch('.album');
                     if (albumResponse.ok) {
                         this.albumData.title = (await albumResponse.text()).trim();
                     }
 
-                    // Load .artist file
                     const artistResponse = await fetch('.artist');
                     if (artistResponse.ok) {
                         this.albumData.artist = (await artistResponse.text()).trim();
@@ -551,7 +715,9 @@
                         const [key, value] = trimmed.split(':').map(s => s.trim());
                         if (key === 'bgPrimary') this.config.bgPrimary = value;
                         if (key === 'bgSecondary') this.config.bgSecondary = value;
+                        if (key === 'bgTertiary') this.config.bgTertiary = value;
                         if (key === 'accentColor') this.config.accentColor = value;
+                        if (key === 'accentHover') this.config.accentHover = value;
                         if (key === 'albumTitleFont') this.config.albumTitleFont = value;
                         if (key === 'lyricsFont') this.config.lyricsFont = value;
                     }
@@ -562,21 +728,19 @@
                 const root = document.documentElement;
                 root.style.setProperty('--bg-primary', this.config.bgPrimary);
                 root.style.setProperty('--bg-secondary', this.config.bgSecondary);
+                root.style.setProperty('--bg-tertiary', this.config.bgTertiary);
                 root.style.setProperty('--accent-color', this.config.accentColor);
+                root.style.setProperty('--accent-hover', this.config.accentHover);
 
                 const albumTitleEl = document.querySelector('.album-title');
                 const lyricsContentEl = document.querySelector('.lyrics-content');
 
                 if (this.config.albumTitleFont === 'serif') {
                     albumTitleEl.style.fontFamily = "'Noto Serif JP', serif";
-                } else {
-                    albumTitleEl.style.fontFamily = "'Noto Sans JP', sans-serif";
                 }
 
                 if (this.config.lyricsFont === 'serif') {
                     lyricsContentEl.style.fontFamily = "'Noto Serif JP', serif";
-                } else {
-                    lyricsContentEl.style.fontFamily = "'Noto Sans JP', sans-serif";
                 }
             }
 
@@ -718,9 +882,10 @@
                 const img = new Image();
                 img.onload = () => {
                     document.getElementById('albumArt').src = img.src;
+                    document.getElementById('albumArtContainer').classList.add('has-image');
                 };
                 img.onerror = () => {
-                    document.getElementById('albumArt').style.backgroundColor = 'var(--subtle-gray)';
+                    document.getElementById('albumArtContainer').classList.remove('has-image');
                 };
                 img.src = 'jacket.jpeg';
             }
@@ -736,14 +901,24 @@
                     trackItem.setAttribute('data-index', i);
                     trackItem.onclick = () => this.playTrack(i);
 
-                    let html = `<div class="track-number">${i + 1}</div>`;
-                    
+                    let iconHtml = '';
                     if (track.iconFile) {
-                        html += `<div class="track-icon"><img src="${track.iconFile}" alt=""></div>`;
+                        iconHtml = `
+                            <div class="track-icon">
+                                <img src="${track.iconFile}" alt="">
+                                <div class="track-play-overlay">⏸</div>
+                            </div>
+                        `;
                     } else {
-                        html += `<div class="track-icon"></div>`;
+                        iconHtml = `
+                            <div class="track-icon">
+                                <div class="track-icon-number">${i + 1}</div>
+                                <div class="track-play-overlay">▶</div>
+                            </div>
+                        `;
                     }
 
+                    let html = iconHtml;
                     html += `
                         <div class="track-info">
                             <div class="track-name">${this.escapeHtml(track.name)}</div>
@@ -805,6 +980,7 @@
                 this.isPlaying = true;
                 this.updateUI();
                 this.updateMediaSession();
+                this.updateLyricsDisplay();
             }
 
             pause() {
@@ -836,16 +1012,10 @@
                 
                 if (this.loopMode === 0) {
                     loopBtn.classList.remove('active');
-                    loopBtn.textContent = '🔁';
-                    loopBtn.title = 'Loop: Off';
                 } else if (this.loopMode === 1) {
                     loopBtn.classList.add('active');
-                    loopBtn.textContent = '🔁';
-                    loopBtn.title = 'Loop: Album';
                 } else {
                     loopBtn.classList.add('active');
-                    loopBtn.textContent = '🔂';
-                    loopBtn.title = 'Loop: Track';
                 }
             }
 
@@ -930,13 +1100,43 @@
             updateUI() {
                 const trackItems = document.querySelectorAll('.track-item');
                 trackItems.forEach((item, index) => {
-                    item.classList.toggle('active', index === this.currentTrackIndex);
+                    if (index === this.currentTrackIndex) {
+                        item.classList.add('playing');
+                        const iconDiv = item.querySelector('.track-icon');
+                        if (iconDiv) {
+                            iconDiv.innerHTML = `
+                                <div class="waveform">
+                                    <div class="waveform-bar"></div>
+                                    <div class="waveform-bar"></div>
+                                    <div class="waveform-bar"></div>
+                                    <div class="waveform-bar"></div>
+                                    <div class="waveform-bar"></div>
+                                </div>
+                            `;
+                        }
+                        const overlay = item.querySelector('.track-play-overlay');
+                        if (overlay) {
+                            overlay.textContent = '⏸';
+                        }
+                    } else {
+                        item.classList.remove('playing');
+                        const iconDiv = item.querySelector('.track-icon');
+                        if (iconDiv) {
+                            const track = this.tracks[index];
+                            if (track.iconFile) {
+                                iconDiv.innerHTML = `<img src="${track.iconFile}" alt=""><div class="track-play-overlay">▶</div>`;
+                            } else {
+                                iconDiv.innerHTML = `<div class="track-icon-number">${index + 1}</div><div class="track-play-overlay">▶</div>`;
+                            }
+                        }
+                    }
                 });
 
+                const playBtn = document.getElementById('playAllBtn');
                 if (this.isPlaying) {
-                    document.getElementById('playAllBtn').classList.add('active');
+                    playBtn.textContent = '⏸';
                 } else {
-                    document.getElementById('playAllBtn').classList.remove('active');
+                    playBtn.textContent = '▶';
                 }
             }
 
@@ -954,19 +1154,27 @@
             toggleLyrics() {
                 const lyricsContainer = document.getElementById('lyricsContainer');
                 const isActive = lyricsContainer.classList.toggle('active');
+                const btn = document.getElementById('lyricsToggleBtn');
                 
                 if (isActive) {
-                    this.displayLyrics();
-                    document.getElementById('lyricsToggleBtn').textContent = '歌詞を非表示';
+                    btn.classList.add('active');
+                    this.updateLyricsDisplay();
                 } else {
-                    document.getElementById('lyricsToggleBtn').textContent = '歌詞を表示';
+                    btn.classList.remove('active');
                 }
             }
 
-            displayLyrics() {
+            updateLyricsDisplay() {
                 const track = this.tracks[this.currentTrackIndex];
-                document.getElementById('lyricsTitle').textContent = track.name;
-                document.getElementById('lyricsContent').textContent = track.lyricsFile || '歌詞がありません';
+                const lyricsContent = document.getElementById('lyricsContent');
+                
+                if (track.lyricsFile) {
+                    lyricsContent.textContent = track.lyricsFile;
+                    lyricsContent.classList.remove('lyrics-empty');
+                } else {
+                    lyricsContent.textContent = '';
+                    lyricsContent.classList.add('lyrics-empty');
+                }
             }
 
             shareAlbum() {
@@ -1000,7 +1208,6 @@
             }
         }
 
-        // Initialize when DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 new AlbumPlayer();
