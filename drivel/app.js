@@ -55,7 +55,7 @@ async function fetchText(url){
 
 /* ---------- 設定ファイル解析 ---------- */
 function parseDesign(text){
-  const cfg = {colors:{}, year:null, albumFont:'明朝', lyricsFont:'明朝', albumTitleSize:null, perSong:{}};
+  const cfg = {colors:{}, year:null, albumFont:'明朝', lyricsFont:'明朝', albumTitleSize:null, lyricsSize:null, perSong:{}};
   text.replace(/\r\n?/g,'\n').split('\n').forEach(raw=>{
     const line = raw.trim();
     if(!line || line.startsWith('#')) return;
@@ -73,6 +73,7 @@ function parseDesign(text){
       case 'リリース年': cfg.year = val; break;
       case 'アルバム名': if(FONT_STACK[val]) cfg.albumFont = val; break;
       case 'アルバム名サイズ': cfg.albumTitleSize = val; break;
+      case '歌詞サイズ': cfg.lyricsSize = val; break;
       case '歌詞':       if(FONT_STACK[val]) cfg.lyricsFont = val; break;
       default:
         if(key.startsWith('歌詞@') && FONT_STACK[val]){
@@ -203,6 +204,13 @@ function applyDesign(){
     if(/^[\d.]+$/.test(v)) v = v + 'rem';
     root.setProperty('--album-title-size', v);
     root.setProperty('--album-title-size-m', `min(${v}, 11vw)`);
+  }
+
+  // 歌詞の文字サイズ（数字だけなら rem 扱い）
+  if(design.lyricsSize){
+    let v = String(design.lyricsSize).trim();
+    if(/^[\d.]+$/.test(v)) v = v + 'rem';
+    root.setProperty('--lyrics-size', v);
   }
 
   // ファビコン（♪）を差し色で塗る
@@ -352,6 +360,9 @@ function select(i, autoplay){
   stopRAF();
   audio.pause();
   isPlaying = false;
+  // 前の曲の効果時間フェーズを必ずリセット（trail を持ち越して終端誤認するのを防ぐ）
+  phase = 'idle';
+  phaseConsumed = 0;
 
   // プレイヤー表示
   $('player').hidden = false;
