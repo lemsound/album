@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Album Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #ffffff;
+            --accent-color: #ffd700;
+            --subtle-gray: #2a2a2a;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .album-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .album-art {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 20px;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: var(--subtle-gray);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .album-art img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .album-title {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            word-break: break-word;
+            line-height: 1.2;
+        }
+
+        .album-artist {
+            font-size: 1.2em;
+            color: #aaa;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .album-info {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .album-info span {
+            display: inline-block;
+        }
+
+        .controls-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .controls-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--subtle-gray);
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .button:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
+            transform: scale(1.1);
+        }
+
+        .button.active {
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
+        }
+
+        .play-button {
+            width: 60px;
+            height: 60px;
+            font-size: 28px;
+        }
+
+        .share-button {
+            flex-shrink: 0;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+            padding: 0 5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background-color: var(--subtle-gray);
+            border-radius: 3px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: height 0.2s ease;
+        }
+
+        .progress-bar:hover {
+            height: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent-color);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .track-list {
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .track-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--subtle-gray);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            gap: 15px;
+        }
+
+        .track-item:last-child {
+            border-bottom: none;
+        }
+
+        .track-item:hover {
+            background-color: var(--subtle-gray);
+        }
+
+        .track-item.active {
+            background-color: var(--subtle-gray);
+            color: var(--accent-color);
+        }
+
+        .track-number {
+            font-size: 0.9em;
+            color: #666;
+            min-width: 30px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .track-item.active .track-number {
+            color: var(--accent-color);
+        }
+
+        .track-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background-color: var(--subtle-gray);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .track-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .track-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .track-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-duration {
+            font-size: 0.85em;
+            color: #999;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .lyrics-section {
+            margin-top: 40px;
+        }
+
+        .lyrics-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .lyrics-toggle button {
+            padding: 10px 20px;
+            background-color: var(--subtle-gray);
+            border: none;
+            color: var(--text-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .lyrics-toggle button:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-primary);
+        }
+
+        .lyrics-container {
+            padding: 30px 20px;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .lyrics-container.active {
+            display: block;
+        }
+
+        .lyrics-title {
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .lyrics-content {
+            white-space: pre-wrap;
+            line-height: 1.8;
+            color: #ccc;
+            font-size: 0.95em;
+            text-align: left;
+            word-break: break-word;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .album-title {
+                font-size: 2em;
+            }
+
+            .album-artist {
+                font-size: 1em;
+            }
+
+            .album-art {
+                max-width: 250px;
+            }
+
+            .controls-wrapper {
+                flex-direction: column;
+            }
+
+            .controls-container {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .share-button {
+                width: 100%;
+            }
+
+            .button {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+
+            .play-button {
+                width: 55px;
+                height: 55px;
+                font-size: 24px;
+            }
+
+            .album-info {
+                gap: 10px;
+                font-size: 0.8em;
+            }
+
+            .track-item {
+                padding: 12px;
+                gap: 10px;
+            }
+
+            .track-number {
+                min-width: 25px;
+            }
+
+            .track-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .lyrics-container {
+                max-height: 400px;
+                padding: 20px;
+            }
+
+            .lyrics-title {
+                font-size: 1.1em;
+                margin-bottom: 15px;
+            }
+
+            .lyrics-content {
+                font-size: 0.9em;
+                line-height: 1.6;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* スクロールバーのスタイリング */
+        .lyrics-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .lyrics-container::-webkit-scrollbar-track {
+            background: var(--subtle-gray);
+            border-radius: 4px;
+        }
+
+        .lyrics-container::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+
+        .lyrics-container::-webkit-scrollbar-thumb:hover {
+            background: #ffed4e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="album-header">
+            <div class="album-art">
+                <img id="albumArt" src="" alt="Album Cover">
+            </div>
+            <div class="album-title" id="albumTitle">Loading...</div>
+            <div class="album-artist" id="albumArtist"></div>
+            <div class="album-info">
+                <span id="releaseYear"></span>
+                <span id="trackCount"></span>
+                <span id="totalDuration"></span>
+            </div>
+        </div>
+
+        <div class="controls-wrapper">
+            <div class="controls-container">
+                <button class="button play-button" id="playAllBtn" title="Play All">▶</button>
+                <button class="button" id="shuffleBtn" title="Shuffle">🔀</button>
+                <button class="button" id="loopBtn" title="Loop">🔁</button>
+            </div>
+            <button class="button share-button" id="shareBtn" title="Share">🔗</button>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="time-display">
+                <span id="currentTime">0:00</span>
+                <span id="totalTime">0:00</span>
+            </div>
+        </div>
+
+        <div class="track-list" id="trackList"></div>
+
+        <div class="lyrics-section">
+            <div class="lyrics-toggle">
+                <button id="lyricsToggleBtn">歌詞を表示</button>
+            </div>
+
+            <div class="lyrics-container" id="lyricsContainer">
+                <div class="lyrics-title" id="lyricsTitle"></div>
+                <div class="lyrics-content" id="lyricsContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        class AlbumPlayer {
+            constructor() {
+                this.albumPath = this.getAlbumPath();
+                this.tracks = [];
+                this.currentTrackIndex = 0;
+                this.isPlaying = false;
+                this.isShuffle = false;
+                this.loopMode = 0; // 0: no loop, 1: album loop, 2: track loop
+                this.albumData = {
+                    title: '',
+                    artist: '',
+                    releaseYear: '',
+                    duration: 0
+                };
+                this.timingData = {};
+                this.config = {
+                    bgPrimary: '#0a0a0a',
+                    bgSecondary: '#1a1a1a',
+                    accentColor: '#ffd700',
+                    albumTitleFont: 'sans',
+                    lyricsFont: 'sans'
+                };
+                this.shuffleOrder = [];
+                this.audioPlayer = document.getElementById('audioPlayer');
+                this.init();
+            }
+
+            getAlbumPath() {
+                const parts = window.location.pathname.split('/').filter(p => p);
+                const lastPart = parts[parts.length - 1];
+                return lastPart && !lastPart.includes('.') ? lastPart : '';
+            }
+
+            async init() {
+                try {
+                    await this.loadConfig();
+                    await this.applyConfig();
+                    await this.loadAlbumMetadata();
+                    await this.loadTiming();
+                    await this.loadTrackOrder();
+                    this.setupEventListeners();
+                    this.setupMediaSession();
+                } catch (e) {
+                    console.error('Initialization error:', e);
+                }
+            }
+
+            async loadConfig() {
+                try {
+                    const response = await fetch('config.txt');
+                    if (response.ok) {
+                        const text = await response.text();
+                        this.parseConfig(text);
+                    }
+                } catch (e) {
+                    console.log('Config file not found, using defaults');
+                }
+            }
+
+            parseConfig(text) {
+                const lines = text.split('\n');
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed || trimmed.startsWith('#')) continue;
+                    
+                    if (trimmed.includes(':')) {
+                        const [key, value] = trimmed.split(':').map(s => s.trim());
+                        if (key === 'bgPrimary') this.config.bgPrimary = value;
+                        if (key === 'bgSecondary') this.config.bgSecondary = value;
+                        if (key === 'accentColor') this.config.accentColor = value;
+                        if (key === 'albumTitleFont') this.config.albumTitleFont = value;
+                        if (key === 'lyricsFont') this.config.lyricsFont = value;
+                    }
+                }
+            }
+
+            async applyConfig() {
+                const root = document.documentElement;
+                root.style.setProperty('--bg-primary', this.config.bgPrimary);
+                root.style.setProperty('--bg-secondary', this.config.bgSecondary);
+                root.style.setProperty('--accent-color', this.config.accentColor);
+
+                const albumTitleEl = document.querySelector('.album-title');
+                const lyricsContentEl = document.querySelector('.lyrics-content');
+
+                if (this.config.albumTitleFont === 'serif') {
+                    albumTitleEl.style.fontFamily = "'Noto Serif JP', serif";
+                } else {
+                    albumTitleEl.style.fontFamily = "'Noto Sans JP', sans-serif";
+                }
+
+                if (this.config.lyricsFont === 'serif') {
+                    lyricsContentEl.style.fontFamily = "'Noto Serif JP', serif";
+                } else {
+                    lyricsContentEl.style.fontFamily = "'Noto Sans JP', sans-serif";
+                }
+            }
+
+            async loadAlbumMetadata() {
+                try {
+                    // Try loading .album file for title
+                    try {
+                        const albumResponse = await fetch('.album');
+                        if (albumResponse.ok) {
+                            const text = await albumResponse.text();
+                            this.albumData.title = text.trim();
+                        }
+                    } catch (e) {}
+
+                    // Try loading .artist file
+                    try {
+                        const artistResponse = await fetch('.artist');
+                        if (artistResponse.ok) {
+                            const text = await artistResponse.text();
+                            this.albumData.artist = text.trim();
+                        }
+                    } catch (e) {}
+
+                    this.updateAlbumDisplay();
+                } catch (e) {
+                    console.error('Error loading album metadata:', e);
+                }
+            }
+
+            async loadTiming() {
+                try {
+                    const response = await fetch('timing.txt');
+                    if (response.ok) {
+                        const text = await response.text();
+                        this.parseTiming(text);
+                    }
+                } catch (e) {
+                    console.log('Timing file not found');
+                }
+            }
+
+            parseTiming(text) {
+                const lines = text.split('\n');
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed || trimmed.startsWith('#')) continue;
+
+                    const match = trimmed.match(/^(.+?)\s*\(\s*head:([+-]?\d+\.?\d*)\s+end:([+-]?\d+\.?\d*)\s*\)$/);
+                    if (match) {
+                        const trackName = match[1].trim();
+                        this.timingData[trackName] = {
+                            headTrim: parseFloat(match[2]),
+                            endTrim: parseFloat(match[3])
+                        };
+                    }
+                }
+            }
+
+            async loadTrackOrder() {
+                try {
+                    const response = await fetch('曲順.txt');
+                    if (!response.ok) {
+                        console.error('Track order file not found');
+                        return;
+                    }
+                    const text = await response.text();
+                    const trackNames = text.split('\n').filter(line => line.trim() && !line.trim().startsWith('#'));
+                    
+                    for (const name of trackNames) {
+                        const track = await this.loadTrack(name.trim());
+                        if (track) {
+                            this.tracks.push(track);
+                        }
+                    }
+
+                    await this.calculateAlbumDuration();
+                    this.renderTrackList();
+                } catch (e) {
+                    console.error('Error loading track order:', e);
+                }
+            }
+
+            async loadTrack(trackName) {
+                const audioExtensions = ['.mp3', '.wav'];
+                let audioFile = null;
+
+                for (const ext of audioExtensions) {
+                    try {
+                        const response = await fetch(trackName + ext, { method: 'HEAD' });
+                        if (response.ok) {
+                            audioFile = trackName + ext;
+                            break;
+                        }
+                    } catch (e) {}
+                }
+
+                if (!audioFile) return null;
+
+                let lyrics = '';
+                try {
+                    const response = await fetch(trackName + '.txt');
+                    if (response.ok) {
+                        lyrics = await response.text();
+                    }
+                } catch (e) {}
+
+                let icon = null;
+                const imageExtensions = ['.jpg', '.jpeg', '.png'];
+                for (const ext of imageExtensions) {
+                    try {
+                        const response = await fetch(trackName + ext, { method: 'HEAD' });
+                        if (response.ok) {
+                            icon = trackName + ext;
+                            break;
+                        }
+                    } catch (e) {}
+                }
+
+                return {
+                    name: trackName,
+                    audioFile: audioFile,
+                    lyricsFile: lyrics,
+                    iconFile: icon,
+                    duration: 0
+                };
+            }
+
+            async calculateAlbumDuration() {
+                let loadedCount = 0;
+                const promises = [];
+
+                for (const track of this.tracks) {
+                    const promise = new Promise((resolve) => {
+                        const audio = new Audio();
+                        audio.onloadedmetadata = () => {
+                            const timing = this.timingData[track.name] || { headTrim: 0, endTrim: 0 };
+                            track.duration = Math.max(0, audio.duration + timing.endTrim - timing.headTrim);
+                            this.albumData.duration += track.duration;
+                            resolve();
+                        };
+                        audio.onerror = () => resolve();
+                        audio.src = track.audioFile;
+                    });
+                    promises.push(promise);
+                }
+
+                await Promise.all(promises);
+                this.updateAlbumDisplay();
+            }
+
+            updateAlbumDisplay() {
+                document.getElementById('albumTitle').textContent = this.albumData.title || 'Album';
+                
+                const artistEl = document.getElementById('albumArtist');
+                if (this.albumData.artist) {
+                    artistEl.textContent = this.albumData.artist;
+                } else {
+                    artistEl.style.display = 'none';
+                }
+
+                document.getElementById('trackCount').textContent = `${this.tracks.length}曲`;
+                document.getElementById('totalDuration').textContent = this.formatTime(this.albumData.duration);
+
+                const img = new Image();
+                img.onload = () => {
+                    document.getElementById('albumArt').src = img.src;
+                };
+                img.onerror = () => {
+                    document.getElementById('albumArt').style.backgroundColor = 'var(--subtle-gray)';
+                };
+                img.src = 'jacket.jpeg';
+            }
+
+            renderTrackList() {
+                const trackList = document.getElementById('trackList');
+                trackList.innerHTML = '';
+
+                for (let i = 0; i < this.tracks.length; i++) {
+                    const track = this.tracks[i];
+                    const trackItem = document.createElement('div');
+                    trackItem.className = 'track-item';
+                    trackItem.setAttribute('data-index', i);
+                    trackItem.onclick = () => this.playTrack(i);
+
+                    let html = `<div class="track-number">${i + 1}</div>`;
+                    
+                    if (track.iconFile) {
+                        html += `<div class="track-icon"><img src="${track.iconFile}" alt=""></div>`;
+                    } else {
+                        html += `<div class="track-icon"></div>`;
+                    }
+
+                    html += `
+                        <div class="track-info">
+                            <div class="track-name">${this.escapeHtml(track.name)}</div>
+                        </div>
+                        <div class="track-duration">${this.formatTime(track.duration)}</div>
+                    `;
+
+                    trackItem.innerHTML = html;
+                    trackList.appendChild(trackItem);
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('playAllBtn').addEventListener('click', () => this.togglePlayAll());
+                document.getElementById('shuffleBtn').addEventListener('click', () => this.toggleShuffle());
+                document.getElementById('loopBtn').addEventListener('click', () => this.toggleLoop());
+                document.getElementById('shareBtn').addEventListener('click', () => this.shareAlbum());
+                document.getElementById('lyricsToggleBtn').addEventListener('click', () => this.toggleLyrics());
+
+                this.audioPlayer.addEventListener('timeupdate', () => this.updateProgress());
+                this.audioPlayer.addEventListener('ended', () => this.nextTrack());
+
+                const progressBar = document.getElementById('progressBar');
+                progressBar.addEventListener('click', (e) => this.seek(e));
+            }
+
+            setupMediaSession() {
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.setActionHandler('play', () => this.play());
+                    navigator.mediaSession.setActionHandler('pause', () => this.pause());
+                    navigator.mediaSession.setActionHandler('nexttrack', () => this.nextTrack());
+                    navigator.mediaSession.setActionHandler('previoustrack', () => this.previousTrack());
+                }
+            }
+
+            togglePlayAll() {
+                if (this.isPlaying) {
+                    this.pause();
+                } else {
+                    if (this.currentTrackIndex >= this.tracks.length) {
+                        this.currentTrackIndex = 0;
+                    }
+                    this.play();
+                }
+            }
+
+            play() {
+                if (this.tracks.length === 0) return;
+
+                const track = this.tracks[this.currentTrackIndex];
+                const timing = this.timingData[track.name] || { headTrim: 0, endTrim: 0 };
+                
+                if (this.audioPlayer.src !== track.audioFile) {
+                    this.audioPlayer.src = track.audioFile;
+                    this.audioPlayer.currentTime = Math.max(0, timing.headTrim);
+                }
+
+                this.audioPlayer.play();
+                this.isPlaying = true;
+                this.updateUI();
+                this.updateMediaSession();
+            }
+
+            pause() {
+                this.audioPlayer.pause();
+                this.isPlaying = false;
+                this.updateUI();
+            }
+
+            toggleShuffle() {
+                this.isShuffle = !this.isShuffle;
+                document.getElementById('shuffleBtn').classList.toggle('active');
+                
+                if (this.isShuffle) {
+                    this.generateShuffleOrder();
+                }
+            }
+
+            generateShuffleOrder() {
+                this.shuffleOrder = Array.from({length: this.tracks.length}, (_, i) => i);
+                for (let i = this.shuffleOrder.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.shuffleOrder[i], this.shuffleOrder[j]] = [this.shuffleOrder[j], this.shuffleOrder[i]];
+                }
+            }
+
+            toggleLoop() {
+                this.loopMode = (this.loopMode + 1) % 3;
+                const loopBtn = document.getElementById('loopBtn');
+                
+                if (this.loopMode === 0) {
+                    loopBtn.classList.remove('active');
+                    loopBtn.textContent = '🔁';
+                    loopBtn.title = 'Loop: Off';
+                } else if (this.loopMode === 1) {
+                    loopBtn.classList.add('active');
+                    loopBtn.textContent = '🔁';
+                    loopBtn.title = 'Loop: Album';
+                } else {
+                    loopBtn.classList.add('active');
+                    loopBtn.textContent = '🔂';
+                    loopBtn.title = 'Loop: Track';
+                }
+            }
+
+            playTrack(index) {
+                this.currentTrackIndex = index;
+                this.play();
+            }
+
+            nextTrack() {
+                if (this.loopMode === 2) {
+                    this.play();
+                    return;
+                }
+
+                if (this.isShuffle) {
+                    const currentPos = this.shuffleOrder.indexOf(this.currentTrackIndex);
+                    if (currentPos < this.shuffleOrder.length - 1) {
+                        this.currentTrackIndex = this.shuffleOrder[currentPos + 1];
+                    } else {
+                        if (this.loopMode === 1) {
+                            this.generateShuffleOrder();
+                            this.currentTrackIndex = this.shuffleOrder[0];
+                        } else {
+                            return;
+                        }
+                    }
+                } else {
+                    if (this.currentTrackIndex < this.tracks.length - 1) {
+                        this.currentTrackIndex++;
+                    } else {
+                        if (this.loopMode === 1) {
+                            this.currentTrackIndex = 0;
+                        } else {
+                            return;
+                        }
+                    }
+                }
+
+                this.play();
+            }
+
+            previousTrack() {
+                if (this.isShuffle) {
+                    const currentPos = this.shuffleOrder.indexOf(this.currentTrackIndex);
+                    if (currentPos > 0) {
+                        this.currentTrackIndex = this.shuffleOrder[currentPos - 1];
+                    }
+                } else {
+                    if (this.currentTrackIndex > 0) {
+                        this.currentTrackIndex--;
+                    }
+                }
+
+                this.play();
+            }
+
+            seek(e) {
+                const progressBar = document.getElementById('progressBar');
+                const rect = progressBar.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                
+                const track = this.tracks[this.currentTrackIndex];
+                const timing = this.timingData[track.name] || { headTrim: 0, endTrim: 0 };
+                const duration = this.audioPlayer.duration || track.duration;
+                
+                this.audioPlayer.currentTime = Math.max(timing.headTrim, timing.headTrim + (percent * track.duration));
+            }
+
+            updateProgress() {
+                const track = this.tracks[this.currentTrackIndex];
+                const timing = this.timingData[track.name] || { headTrim: 0, endTrim: 0 };
+                
+                const currentTime = Math.max(0, this.audioPlayer.currentTime - timing.headTrim);
+                const displayDuration = track.duration;
+                
+                const percent = (currentTime / displayDuration) * 100;
+                document.getElementById('progressFill').style.width = percent + '%';
+                document.getElementById('currentTime').textContent = this.formatTime(currentTime);
+                document.getElementById('totalTime').textContent = this.formatTime(displayDuration);
+            }
+
+            updateUI() {
+                const trackItems = document.querySelectorAll('.track-item');
+                trackItems.forEach((item, index) => {
+                    item.classList.toggle('active', index === this.currentTrackIndex);
+                });
+
+                if (this.isPlaying) {
+                    document.getElementById('playAllBtn').classList.add('active');
+                } else {
+                    document.getElementById('playAllBtn').classList.remove('active');
+                }
+            }
+
+            updateMediaSession() {
+                if ('mediaSession' in navigator) {
+                    const track = this.tracks[this.currentTrackIndex];
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: track.name,
+                        artist: this.albumData.artist,
+                        album: this.albumData.title
+                    });
+                }
+            }
+
+            toggleLyrics() {
+                const lyricsContainer = document.getElementById('lyricsContainer');
+                const isActive = lyricsContainer.classList.toggle('active');
+                
+                if (isActive) {
+                    this.displayLyrics();
+                    document.getElementById('lyricsToggleBtn').textContent = '歌詞を非表示';
+                } else {
+                    document.getElementById('lyricsToggleBtn').textContent = '歌詞を表示';
+                }
+            }
+
+            displayLyrics() {
+                const track = this.tracks[this.currentTrackIndex];
+                document.getElementById('lyricsTitle').textContent = track.name;
+                document.getElementById('lyricsContent').textContent = track.lyricsFile || '歌詞がありません';
+            }
+
+            shareAlbum() {
+                const url = window.location.href;
+                if (navigator.share) {
+                    navigator.share({
+                        title: this.albumData.title,
+                        text: `${this.albumData.artist} - ${this.albumData.title}`,
+                        url: url
+                    }).catch(err => console.log('Share cancelled'));
+                } else {
+                    navigator.clipboard.writeText(url).then(() => {
+                        alert('URLをコピーしました');
+                    }).catch(() => {
+                        alert(url);
+                    });
+                }
+            }
+
+            formatTime(seconds) {
+                if (!seconds || isNaN(seconds)) return '0:00';
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                new AlbumPlayer();
+            });
+        } else {
+            new AlbumPlayer();
+        }
+    </script>
+</body>
+</html>
