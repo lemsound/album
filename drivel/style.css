@@ -12,10 +12,10 @@
   --text:#f2f2f2;
   --muted:#8c8c8c;
 
-  --font-ui:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",
-            "Hiragino Sans","Yu Gothic","Meiryo",sans-serif;
-  --font-album:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
-  --font-lyrics:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --font-ui:"游ゴシック","Yu Gothic","YuGothic","Hiragino Kaku Gothic ProN",
+            "Hiragino Sans","Noto Sans JP","Meiryo",sans-serif;
+  --font-album:"Shippori Mincho","Hiragino Mincho ProN","游明朝","Yu Mincho",serif;
+  --font-lyrics:"游明朝","Yu Mincho","YuMincho","Hiragino Mincho ProN","Noto Serif JP",serif;
 
   --bar-h:84px;          /* 下部プレイヤーの高さ */
   --maxw:980px;
@@ -178,6 +178,8 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
 .track__bars span:nth-child(2){animation-delay:.2s;}
 .track__bars span:nth-child(3){animation-delay:.4s;}
 @keyframes eq{0%,100%{height:4px;}50%{height:14px;}}
+.track__pause{display:inline-flex;align-items:center;justify-content:center;color:var(--accent);}
+.track__pause svg{width:13px;height:13px;}
 
 /* ---------- 下部プレイヤー ---------- */
 .player{
@@ -278,7 +280,17 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
   padding:8px clamp(18px,5vw,32px) 40px;
   /* 文字は左寄せのまま、ブロック自体を画面中央へ */
   text-align:center;
+  /* スクロールバーは背景なし・グレーのバーだけ */
+  scrollbar-width:thin;
+  scrollbar-color:color-mix(in srgb,var(--muted) 70%,transparent) transparent;
 }
+.lyrics__body::-webkit-scrollbar{width:8px;}
+.lyrics__body::-webkit-scrollbar-track{background:transparent;}
+.lyrics__body::-webkit-scrollbar-thumb{
+  background:color-mix(in srgb,var(--muted) 60%,transparent);
+  border-radius:8px;border:2px solid transparent;background-clip:content-box;
+}
+.lyrics__body::-webkit-scrollbar-thumb:hover{background:var(--muted);background-clip:content-box;}
 .lyrics__inner{
   display:inline-block;
   text-align:left;            /* 中身の文字は左揃え */

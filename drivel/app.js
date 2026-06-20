@@ -5,17 +5,19 @@
 
 /* ---------- フォント定義 ---------- */
 const FONT_STACK = {
-  '明朝'   : `"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif`,
-  'ゴシック': `"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif`,
+  '明朝'   : `"游明朝","Yu Mincho","YuMincho","Hiragino Mincho ProN","Noto Serif JP",serif`,
+  'ゴシック': `"游ゴシック","Yu Gothic","YuGothic","Hiragino Kaku Gothic ProN","Noto Sans JP","Meiryo",sans-serif`,
   'セリフ' : `"EB Garamond",Georgia,"Times New Roman",serif`,
   'サンセリフ': `"Inter",system-ui,-apple-system,sans-serif`,
 };
 const GOOGLE_FONT = {
-  '明朝'   : 'Shippori+Mincho:wght@500;700',
-  'ゴシック': 'Noto+Sans+JP:wght@400;500;700',
+  '明朝'   : 'Noto+Serif+JP:wght@400;500;700',   // 游明朝が無い端末向けフォールバック
+  'ゴシック': 'Noto+Sans+JP:wght@400;500;700',    // 游ゴシックが無い端末向けフォールバック
   'セリフ' : 'EB+Garamond:ital,wght@0,400;0,600;1,400',
   'サンセリフ': 'Inter:wght@400;500;700',
 };
+// アルバムタイトル専用（このフォントは気に入っているので維持）
+const ALBUM_TITLE_FONT = `"Shippori Mincho","Hiragino Mincho ProN","游明朝","Yu Mincho",serif`;
 const _loadedFonts = new Set();
 function ensureFont(name){
   if(!GOOGLE_FONT[name] || _loadedFonts.has(name)) return;
@@ -23,6 +25,14 @@ function ensureFont(name){
   const l = document.createElement('link');
   l.rel = 'stylesheet';
   l.href = `https://fonts.googleapis.com/css2?family=${GOOGLE_FONT[name]}&display=swap`;
+  document.head.appendChild(l);
+}
+function ensureShippori(){
+  if(_loadedFonts.has('__shippori')) return;
+  _loadedFonts.add('__shippori');
+  const l = document.createElement('link');
+  l.rel = 'stylesheet';
+  l.href = 'https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap';
   document.head.appendChild(l);
 }
 
@@ -174,9 +184,17 @@ function applyDesign(){
   if(design.colors['--surface']) root.setProperty('--surface-2',
     `color-mix(in srgb, ${design.colors['--surface']} 80%, #fff 8%)`);
 
+  ensureFont('ゴシック');            // UI（游ゴシック）のフォールバック Noto を読む
   ensureFont(design.albumFont);
   ensureFont(design.lyricsFont);
-  root.setProperty('--font-album', FONT_STACK[design.albumFont]);
+
+  // アルバムタイトルは Shippori Mincho を維持（明朝指定のとき）
+  if(design.albumFont === '明朝'){
+    ensureShippori();
+    root.setProperty('--font-album', ALBUM_TITLE_FONT);
+  }else{
+    root.setProperty('--font-album', FONT_STACK[design.albumFont]);
+  }
   root.setProperty('--font-lyrics', FONT_STACK[design.lyricsFont]);
 
   // アルバム名サイズ（数字だけなら rem 扱い。スマホは画面幅で頭打ち）
@@ -194,7 +212,7 @@ function applyDesign(){
 }
 
 function setFavicon(color){
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><text x="16" y="25" font-family="serif" font-size="28" text-anchor="middle" fill="${color}">♪</text></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g fill="${color}"><ellipse cx="12" cy="22" rx="7" ry="6"/><rect x="17.3" y="6" width="2.7" height="16.4" rx="1.2"/><path d="M19 5.6c2.7.7 5 2.5 5 5.5 0 1-.25 1.9-.7 2.7.25-2.7-1.8-4.5-4.3-5.2z"/></g></svg>`;
   const href = 'data:image/svg+xml,' + encodeURIComponent(svg);
   let link = document.getElementById('favicon');
   if(!link){ link = document.createElement('link'); link.rel = 'icon'; link.id = 'favicon'; document.head.appendChild(link); }
@@ -300,12 +318,16 @@ function renderList(){
 
 function markCurrent(){
   document.querySelectorAll('.track').forEach((el,i)=>{
-    const on = (i === cur);
-    el.classList.toggle('is-current', on);
+    const isCur = (i === cur);
+    el.classList.toggle('is-current', isCur);
     const num = el.querySelector('.track__index');
-    if(on && isPlaying){
+    if(isCur && isPlaying){
       if(!num.querySelector('.track__bars'))
         num.innerHTML = '<span class="track__bars"><span></span><span></span><span></span></span>';
+    }else if(isCur){
+      // 選択中だが停止 → 番号でなく一時停止マーク
+      if(!num.querySelector('.track__pause'))
+        num.innerHTML = '<span class="track__pause"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pause"></use></svg></span>';
     }else{
       num.textContent = i+1;
     }
@@ -536,7 +558,10 @@ function lyricFontFor(t){
   return design.perSong[t.name] || design.lyricsFont;
 }
 async function openLyrics(){
-  if(cur < 0){ playAll(); }
+  if(cur < 0){
+    const first = tracks.findIndex(t=> t.playable);
+    if(first >= 0) select(first, false);   // 再生はせず、曲だけ選んで歌詞を出す
+  }
   const t = tracks[cur]; if(!t) return;
   $('lyricsTitle').textContent = t.name;
   const body = $('lyricsBody');
