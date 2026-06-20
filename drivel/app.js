@@ -244,16 +244,28 @@ function buildTracks(){
   rebuildOrder();
 }
 
-function rebuildOrder(){
+function shuffledIndices(avoidFirst){
+  // 全曲を Fisher-Yates でシャッフル。avoidFirst を指定すると先頭に来ないようにする
   const idx = tracks.map((_,i)=> i);
+  for(let i=idx.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; }
+  if(avoidFirst != null && idx.length > 1 && idx[0] === avoidFirst){
+    const k = 1 + Math.floor(Math.random()*(idx.length-1));
+    [idx[0], idx[k]] = [idx[k], idx[0]];
+  }
+  return idx;
+}
+
+function rebuildOrder(){
   if(shuffleOn){
-    for(let i=idx.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; }
-    if(cur >= 0){ // 現在曲を先頭へ
+    const idx = shuffledIndices();
+    if(cur >= 0){                       // 再生中の曲は止めず先頭に置く
       const p = idx.indexOf(cur);
       if(p > 0){ idx.splice(p,1); idx.unshift(cur); }
     }
+    order = idx;
+  }else{
+    order = tracks.map((_,i)=> i);
   }
-  order = idx;
 }
 
 /* ---------- 描画 ---------- */
@@ -553,16 +565,33 @@ function trackEnded(){
 /* ---------- 曲送り ---------- */
 function posInOrder(){ return order.indexOf(cur); }
 
+/* シャッフル時：今かかっている曲以外からランダムに1曲（直前の曲も避ける）*/
+let shuffleHistory = [];
+function randomOther(){
+  const pool = tracks.map((_,i)=> i).filter(i=> tracks[i].playable && i !== cur);
+  if(!pool.length) return -1;
+  if(pool.length > 1 && shuffleHistory.length){
+    const last = shuffleHistory[shuffleHistory.length-1];
+    const p2 = pool.filter(i=> i !== last);
+    if(p2.length) return p2[Math.floor(Math.random()*p2.length)];
+  }
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
 function next(auto){
-  let p = posInOrder();
-  for(let step=1; step<=order.length; step++){
-    let np = p + step;
-    if(np >= order.length){
-      if(loopMode === 1 || (auto && loopMode === 1)) np = np % order.length;
-      else if(!auto) np = np % order.length;       // 手動は末尾→先頭で巡回
-      else { stopPlayback(); return; }             // 自動でループoffなら終了
-    }
-    const cand = order[np];
+  if(shuffleOn){
+    const n = randomOther();
+    if(n >= 0){ if(cur >= 0) shuffleHistory.push(cur); select(n, true); return; }
+    stopPlayback(); return;
+  }
+  if(!order.length) return;
+  let np = posInOrder() + 1;
+  if(np >= order.length){
+    if(auto && loopMode !== 1){ stopPlayback(); return; }   // 自動でアルバムループOFFなら終了
+    np = 0;
+  }
+  for(let step=0; step<order.length; step++){
+    const cand = order[(np + step) % order.length];
     if(tracks[cand].playable){ select(cand, true); return; }
   }
   stopPlayback();
@@ -570,6 +599,15 @@ function next(auto){
 
 function prev(){
   if(cur >= 0 && currentP() > 3){ seekToP(0, isPlaying); if(isPlaying) startRAF(); return; }
+  if(shuffleOn){
+    if(shuffleHistory.length){
+      const pv = shuffleHistory.pop();
+      if(tracks[pv] && tracks[pv].playable){ select(pv, isPlaying || true); return; }
+    }
+    const n = randomOther();
+    if(n >= 0) select(n, isPlaying || true);
+    return;
+  }
   let p = posInOrder();
   for(let step=1; step<=order.length; step++){
     let np = (p - step + order.length) % order.length;
@@ -579,8 +617,15 @@ function prev(){
 }
 
 function playAll(){
+  shuffleHistory = [];
   rebuildOrder();
-  const first = order.find(i=> tracks[i].playable);
+  let first;
+  if(shuffleOn){
+    const pool = tracks.map((_,i)=> i).filter(i=> tracks[i].playable);
+    first = pool.length ? pool[Math.floor(Math.random()*pool.length)] : null;
+  }else{
+    first = order.find(i=> tracks[i].playable);
+  }
   if(first != null) select(first, true);
 }
 
@@ -689,10 +734,12 @@ function linkFor(t){
   return t ? base + '?t=' + encodeURIComponent(t.name) : base;
 }
 function isMobile(){ return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
+function albumUrl(){
+  return (location.origin + location.pathname).replace(/index\.html?$/i, '');
+}
 async function share(){
-  const t = (cur >= 0) ? tracks[cur] : null;
-  const url = linkFor(t);
-  const title = manifest.album + (t ? ' / ' + t.name : '');
+  const url = albumUrl();                 // 常にアルバムのアドレスを共有
+  const title = manifest.album;
   if(navigator.share && isMobile()){
     try{ await navigator.share({title, url}); return; }catch(_){ return; }
   }
@@ -812,6 +859,7 @@ function cycleLoop(){
 }
 function toggleShuffle(){
   shuffleOn = !shuffleOn;
+  shuffleHistory = [];
   const b = $('shuffle');
   b.setAttribute('aria-pressed', String(shuffleOn));
   b.classList.toggle('is-active', shuffleOn);

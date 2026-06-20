@@ -140,7 +140,8 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
   background:var(--accent);margin-top:30px;
 }
 .btn--icon{position:relative;}
-.controls__share{margin-left:auto;}
+.controls__download{margin-left:auto;}
+.controls__share{margin-left:0;}
 
 /* ---------- トラックリスト ---------- */
 .tracks{list-style:none;margin:0;padding:0;}
@@ -235,7 +236,6 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
 .transport__play svg{width:22px;height:22px;}
 .player__right{display:flex;align-items:center;justify-content:flex-end;gap:10px;}
 .vol-wrap{display:flex;align-items:center;gap:8px;}
-.vol-ico{width:18px;height:18px;color:var(--muted);flex:0 0 auto;}
 .vol{
   -webkit-appearance:none;appearance:none;width:90px;height:18px;background:transparent;cursor:pointer;
 }
@@ -254,10 +254,10 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
 
 /* ---------- ミュート（スピーカー）ボタン ---------- */
 .vol-ico{
-  width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;
-  color:var(--muted);flex:0 0 auto;border-radius:50%;
+  width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;
+  color:var(--muted);flex:0 0 auto;border-radius:8px;
 }
-.vol-ico svg{width:18px;height:18px;}
+.vol-ico svg{width:22px;height:22px;}
 .vol-ico:hover{color:var(--text);background:var(--surface);}
 
 /* ---------- ダウンロードボタン ---------- */
@@ -318,13 +318,14 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
 .dl__btn:hover{background:color-mix(in srgb,var(--accent) 18%,transparent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);}
 .dl__btn svg{width:18px;height:18px;}
 
-.share{display:flex;flex-direction:column;gap:14px;}
+.share{display:flex;flex-direction:column;gap:14px;align-items:center;}
 .share__url{
-  font-size:.86rem;color:var(--muted);word-break:break-all;
+  width:100%;
+  font-size:.86rem;color:var(--muted);word-break:break-all;text-align:center;
   padding:11px 13px;border-radius:10px;background:var(--bg);
   border:1px solid color-mix(in srgb,var(--text) 10%,transparent);
 }
-.share .dl__btn{align-self:flex-start;}
+.share .dl__btn{align-self:center;}
 
 /* ---------- 歌詞パネル ---------- */
 .lyrics{
@@ -418,8 +419,11 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
 
   /* ダウンロードボタンの出し分け */
   .controls__download{display:none;}          /* スマホはアルバム一括DLなし */
-  .track__dl{display:none;}                    /* スマホは行ホバーDLなし */
-  .track-dl:not([hidden]){display:inline-flex;} /* スマホのプレイヤー内・曲DLを表示 */
+  .track-dl{display:none;}                     /* プレイヤー内のDLは使わない */
+  /* リスト行：再生中（is-current）の曲だけ、再生時間の左にDLを表示 */
+  .track__dl{display:inline-flex;opacity:0;pointer-events:none;}
+  .track:hover .track__dl{opacity:0;}          /* スマホはホバー表示しない */
+  .track.is-current .track__dl{opacity:1;pointer-events:auto;}
 }
 
 @media (prefers-reduced-motion:reduce){
