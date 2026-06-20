@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>三文抒情</title>
+<meta name="theme-color" content="#000000">
+<meta name="description" content="三文抒情 — アルバムプレイヤー">
+<!-- OGP（共有時のカード表示用。jacket をサムネに使う） -->
+<meta property="og:type" content="music.album">
+<meta property="og:title" content="三文抒情">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- アイコン定義（画面には出ません） -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.14v13.72c0 .79.87 1.27 1.54.84l10.79-6.86a1 1 0 0 0 0-1.69L9.54 4.3A1 1 0 0 0 8 5.14Z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M7 5h3.2v14H7zM13.8 5H17v14h-3.2z"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path fill="currentColor" d="M7 6h2v12H7zm10.5.2L9 11.4a.7.7 0 0 0 0 1.2l8.5 5.2a.7.7 0 0 0 1.06-.6V6.8a.7.7 0 0 0-1.06-.6Z"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path fill="currentColor" d="M15 6h2v12h-2zM6.5 6.2 15 11.4a.7.7 0 0 1 0 1.2l-8.5 5.2A.7.7 0 0 1 5.44 17.2V6.8A.7.7 0 0 1 6.5 6.2Z"/></symbol>
+  <symbol id="i-shuffle" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M3 7h3.5c1.4 0 2.3.7 3.1 1.8l4.2 6.4c.8 1.1 1.7 1.8 3.1 1.8H21M3 17h3.5c1.4 0 2.3-.7 3.1-1.8M14.4 8.8C15.2 7.7 16.1 7 17.5 7H21"/><path fill="currentColor" d="m18.5 4.5 3 2.5-3 2.5zM18.5 14.5l3 2.5-3 2.5z"/></symbol>
+  <symbol id="i-loop" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M17 3.5 20.5 7 17 10.5M20.5 7H8.5A4.5 4.5 0 0 0 4 11.5M7 20.5 3.5 17 7 13.5M3.5 17h12A4.5 4.5 0 0 0 20 12.5"/></symbol>
+  <symbol id="i-loop1" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M17 3.5 20.5 7 17 10.5M20.5 7H8.5A4.5 4.5 0 0 0 4 11.5M7 20.5 3.5 17 7 13.5M3.5 17h12A4.5 4.5 0 0 0 20 12.5"/><text x="12" y="14.5" font-size="8" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M18 8a2.5 2.5 0 1 0-2.45-3M6 14.5A2.5 2.5 0 1 0 6 9.5a2.5 2.5 0 0 0 0 5ZM18 21a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM8.2 11.3l7.6-3.6M8.2 13.2l7.6 3.5"/></symbol>
+</svg>
+
+<div id="app">
+  <div class="loading" id="loading">読み込み中…</div>
+
+  <main class="screen" id="screen" hidden>
+    <header class="album">
+      <div class="album__art" id="art"></div>
+      <div class="album__meta">
+        <p class="album__eyebrow">Album</p>
+        <h1 class="album__title" id="albumTitle"></h1>
+        <p class="album__artist" id="albumArtist" hidden></p>
+        <p class="album__stats">
+          <span id="statYear" hidden></span>
+          <span id="statCount"></span>
+          <span id="statTotal"></span>
+        </p>
+        <div class="controls">
+          <button class="btn btn--primary" id="playAll">
+            <svg aria-hidden="true"><use href="#i-play"></use></svg><span>再生</span>
+          </button>
+          <button class="btn btn--icon" id="shuffle" aria-pressed="false" aria-label="シャッフル" title="シャッフル">
+            <svg aria-hidden="true"><use href="#i-shuffle"></use></svg>
+          </button>
+          <button class="btn btn--icon" id="loop" aria-label="ループ：オフ" title="ループ：オフ">
+            <svg aria-hidden="true"><use href="#i-loop"></use></svg>
+          </button>
+          <button class="btn btn--icon controls__share" id="share" aria-label="リンクを共有" title="リンクを共有">
+            <svg aria-hidden="true"><use href="#i-share"></use></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <ol class="tracks" id="tracklist"></ol>
+    <footer class="credit" id="credit"></footer>
+  </main>
+
+  <!-- 歌詞パネル -->
+  <section class="lyrics" id="lyrics" hidden aria-label="歌詞">
+    <div class="lyrics__head">
+      <span class="lyrics__title" id="lyricsTitle">歌詞</span>
+      <button class="lyrics__close" id="lyricsClose">閉じる</button>
+    </div>
+    <div class="lyrics__body" id="lyricsBody"></div>
+  </section>
+
+  <!-- 下部プレイヤー -->
+  <div class="player" id="player" hidden>
+    <div class="player__inner">
+      <div class="player__seek">
+        <span class="time" id="cur">0:00</span>
+        <input class="seek" id="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="再生位置">
+        <span class="time time--end" id="dur">0:00</span>
+      </div>
+      <div class="player__row">
+        <div class="np" id="np">
+          <img class="np__art" id="npArt" alt="" hidden>
+          <div>
+            <div class="np__title" id="npTitle"></div>
+            <button class="np__lyrics" id="npLyrics">歌詞をみる</button>
+          </div>
+        </div>
+        <div class="transport">
+          <button id="prev" aria-label="前の曲"><svg aria-hidden="true"><use href="#i-prev"></use></svg></button>
+          <button class="transport__play" id="play" aria-label="再生"><svg aria-hidden="true"><use href="#i-play"></use></svg></button>
+          <button id="next" aria-label="次の曲"><svg aria-hidden="true"><use href="#i-next"></use></svg></button>
+        </div>
+        <div class="player__right">
+          <button class="lyrics-toggle" id="lyricsToggle">歌詞</button>
+          <input class="vol" id="vol" type="range" min="0" max="1" step="0.01" value="1" aria-label="音量">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+</div>
+
+<audio id="audio" preload="metadata"></audio>
+<script src="app.js"></script>
+</body>
+</html>

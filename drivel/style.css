@@ -1,0 +1,323 @@
+/* =========================================================
+   三文抒情 — アルバムプレイヤー  style.css
+   色とフォントは design.txt から JS が上書きします。
+   下の :root の値は読み込み前の初期値（フォールバック）です。
+   ========================================================= */
+
+:root{
+  --bg:#000000;
+  --surface:#161616;
+  --surface-2:#202022;
+  --accent:#e8c45a;
+  --text:#f2f2f2;
+  --muted:#8c8c8c;
+
+  --font-ui:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",
+            "Hiragino Sans","Yu Gothic","Meiryo",sans-serif;
+  --font-album:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --font-lyrics:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+
+  --bar-h:84px;          /* 下部プレイヤーの高さ */
+  --maxw:980px;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-ui);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  line-height:1.5;
+  overflow-x:hidden;
+}
+img{display:block;max-width:100%;}
+button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none;}
+button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+  border-radius:6px;
+}
+
+/* ---------- レイアウト土台 ---------- */
+.screen{
+  max-width:var(--maxw);
+  margin:0 auto;
+  padding:clamp(20px,4vw,48px) clamp(16px,4vw,40px);
+  padding-bottom:calc(var(--bar-h) + 40px);   /* プレイヤーぶん空ける */
+}
+
+/* ---------- アルバムヘッダー ---------- */
+.album{
+  display:grid;
+  grid-template-columns:minmax(0,260px) 1fr;
+  gap:clamp(20px,4vw,40px);
+  align-items:end;
+  margin-bottom:clamp(24px,4vw,40px);
+}
+.album__art{
+  aspect-ratio:1/1;
+  border-radius:10px;
+  overflow:hidden;
+  background:var(--surface);
+  box-shadow:0 24px 60px -24px rgba(0,0,0,.8);
+}
+.album__art img{width:100%;height:100%;object-fit:cover;}
+.album__art--empty{display:flex;align-items:center;justify-content:center;color:var(--muted);}
+
+.album__meta{min-width:0;}
+.album__eyebrow{
+  margin:0 0 .5em;
+  font-size:.72rem;
+  letter-spacing:.28em;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+.album__title{
+  font-family:var(--font-album);
+  font-weight:700;
+  /* ドデカく */
+  font-size:clamp(2.7rem,8.5vw,5.6rem);
+  line-height:1.04;
+  letter-spacing:.01em;
+  margin:0 0 .18em;
+  word-break:break-word;
+}
+.album__artist{
+  margin:.2em 0 0;
+  font-size:1.05rem;
+  font-weight:600;
+  color:var(--text);
+}
+.album__stats{
+  margin:.9em 0 0;
+  font-size:.85rem;
+  color:var(--muted);
+  display:flex;flex-wrap:wrap;gap:.5em;align-items:center;
+}
+.album__stats span:not(:first-child)::before{
+  content:"·";margin-right:.5em;color:var(--muted);
+}
+
+/* ---------- コントロール列 ---------- */
+.controls{
+  display:flex;align-items:center;gap:14px;
+  margin-top:clamp(18px,3vw,26px);
+}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.55em;
+  transition:transform .12s ease,color .12s ease,background .12s ease,box-shadow .12s ease;
+}
+.btn svg{width:22px;height:22px;display:block;}
+.btn--primary{
+  background:var(--accent);
+  color:#0c0c0c;
+  font-weight:700;
+  font-size:.95rem;
+  padding:13px 26px 13px 22px;
+  border-radius:999px;
+  /* 月明かりのにじみ */
+  box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 55%,transparent),
+             0 8px 30px -10px color-mix(in srgb,var(--accent) 70%,transparent);
+}
+.btn--primary:hover{transform:scale(1.04);}
+.btn--primary svg{width:18px;height:18px;}
+.btn--icon{
+  width:44px;height:44px;border-radius:50%;
+  color:var(--muted);
+}
+.btn--icon:hover{color:var(--text);background:var(--surface);}
+.btn--icon[aria-pressed="true"],
+.btn--icon.is-active{color:var(--accent);}
+.btn--icon[aria-pressed="true"]::after,
+.btn--icon.is-active::after{
+  content:"";position:absolute;width:4px;height:4px;border-radius:50%;
+  background:var(--accent);margin-top:30px;
+}
+.btn--icon{position:relative;}
+.controls__share{margin-left:auto;}
+
+/* ---------- トラックリスト ---------- */
+.tracks{list-style:none;margin:0;padding:0;}
+.track{
+  display:grid;
+  grid-template-columns:28px auto 1fr auto;
+  align-items:center;
+  gap:14px;
+  padding:11px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background .12s ease;
+}
+.track:hover{background:var(--surface);}
+.track.is-current{background:color-mix(in srgb,var(--surface) 80%,var(--accent) 6%);}
+.track__index{
+  color:var(--muted);font-size:.92rem;text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+.track.is-current .track__index{color:var(--accent);}
+.track__art{width:38px;height:38px;border-radius:5px;object-fit:cover;background:var(--surface-2);}
+.track__art--spacer{width:0;}                 /* 画像が無い曲は左に何も付けない */
+.track__title{
+  min-width:0;font-size:1rem;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.track.is-current .track__title{color:var(--accent);}
+.track__dur{color:var(--muted);font-size:.9rem;font-variant-numeric:tabular-nums;}
+.track.is-empty{opacity:.45;}
+.track__bars{display:inline-flex;gap:2px;align-items:flex-end;height:14px;margin-left:2px;}
+.track__bars span{width:3px;background:var(--accent);border-radius:1px;animation:eq 1s ease-in-out infinite;}
+.track__bars span:nth-child(2){animation-delay:.2s;}
+.track__bars span:nth-child(3){animation-delay:.4s;}
+@keyframes eq{0%,100%{height:4px;}50%{height:14px;}}
+
+.credit{margin-top:40px;color:var(--muted);font-size:.78rem;letter-spacing:.04em;}
+
+/* ---------- 下部プレイヤー ---------- */
+.player{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  background:color-mix(in srgb,var(--surface) 92%,#000);
+  backdrop-filter:saturate(1.2) blur(8px);
+  border-top:1px solid color-mix(in srgb,var(--text) 8%,transparent);
+}
+.player__inner{max-width:var(--maxw);margin:0 auto;padding:8px clamp(14px,4vw,28px) 10px;}
+.player__seek{display:flex;align-items:center;gap:12px;}
+.time{font-size:.72rem;color:var(--muted);min-width:38px;font-variant-numeric:tabular-nums;}
+.time--end{text-align:right;}
+
+/* シークバー（range を自前スタイル） */
+.seek{
+  -webkit-appearance:none;appearance:none;width:100%;height:16px;background:transparent;cursor:pointer;
+}
+.seek::-webkit-slider-runnable-track{
+  height:4px;border-radius:3px;
+  background:linear-gradient(to right,var(--accent) var(--p,0%),
+            color-mix(in srgb,var(--text) 22%,transparent) var(--p,0%));
+}
+.seek::-moz-range-track{height:4px;border-radius:3px;background:color-mix(in srgb,var(--text) 22%,transparent);}
+.seek::-moz-range-progress{height:4px;border-radius:3px;background:var(--accent);}
+.seek::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:12px;height:12px;margin-top:-4px;
+  border-radius:50%;background:var(--text);
+  box-shadow:0 0 6px color-mix(in srgb,var(--accent) 80%,transparent);
+  opacity:0;transition:opacity .12s ease;
+}
+.seek:hover::-webkit-slider-thumb,.seek:focus-visible::-webkit-slider-thumb{opacity:1;}
+.seek::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:var(--text);}
+
+.player__row{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-top:4px;
+}
+.np{display:flex;align-items:center;gap:12px;min-width:0;}
+.np__art{width:46px;height:46px;border-radius:6px;object-fit:cover;background:var(--surface-2);flex:0 0 auto;}
+.np__title{
+  font-size:.95rem;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.transport{display:flex;align-items:center;gap:10px;justify-self:center;}
+.transport button{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text);}
+.transport button:hover{background:var(--surface-2);}
+.transport button svg{width:20px;height:20px;}
+.transport__play{
+  width:50px;height:50px;background:var(--accent);color:#0c0c0c;
+  box-shadow:0 6px 24px -10px color-mix(in srgb,var(--accent) 80%,transparent);
+}
+.transport__play:hover{background:var(--accent);transform:scale(1.05);}
+.transport__play svg{width:22px;height:22px;}
+.player__right{display:flex;align-items:center;justify-content:flex-end;gap:14px;}
+.lyrics-toggle{
+  font-size:.82rem;color:var(--muted);letter-spacing:.06em;
+  padding:7px 12px;border-radius:999px;
+}
+.lyrics-toggle:hover{color:var(--text);}
+.lyrics-toggle.is-active{color:var(--accent);}
+.vol{
+  -webkit-appearance:none;appearance:none;width:84px;height:4px;border-radius:3px;
+  background:color-mix(in srgb,var(--text) 22%,transparent);cursor:pointer;
+}
+.vol::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--text);}
+.vol::-moz-range-thumb{width:11px;height:11px;border:0;border-radius:50%;background:var(--text);}
+
+/* ---------- 歌詞パネル ---------- */
+.lyrics{
+  position:fixed;inset:0;z-index:40;
+  background:color-mix(in srgb,var(--bg) 96%,#000);
+  backdrop-filter:blur(14px);
+  display:flex;flex-direction:column;
+  padding-bottom:var(--bar-h);
+  animation:rise .28s ease;
+}
+@keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.lyrics__head{
+  display:flex;align-items:center;justify-content:space-between;
+  max-width:720px;width:100%;margin:0 auto;
+  padding:clamp(18px,4vw,30px) clamp(18px,5vw,32px) 6px;
+}
+.lyrics__title{font-size:.82rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;}
+.lyrics__close{color:var(--muted);font-size:.82rem;padding:8px 12px;border-radius:999px;}
+.lyrics__close:hover{color:var(--text);background:var(--surface);}
+.lyrics__body{
+  flex:1;overflow-y:auto;
+  max-width:720px;width:100%;margin:0 auto;
+  padding:8px clamp(18px,5vw,32px) 40px;
+  /* 列は中央寄せ・文字は左寄せ */
+  text-align:left;
+}
+.lyrics__inner{
+  font-family:var(--font-lyrics);
+  font-size:clamp(1rem,1.05rem + .2vw,1.18rem);
+  line-height:2.05;
+  letter-spacing:.02em;
+  color:color-mix(in srgb,var(--text) 92%,transparent);
+  max-width:30em;margin:0 auto;       /* 中央のカラム、中身は左揃え */
+}
+.lyrics__inner p{margin:0;}
+.lyrics__inner p.blank{height:1.1em;}
+.lyrics__empty{color:var(--muted);font-family:var(--font-ui);}
+
+/* ---------- トースト ---------- */
+.toast{
+  position:fixed;left:50%;bottom:calc(var(--bar-h) + 18px);transform:translateX(-50%);
+  background:var(--surface-2);color:var(--text);
+  padding:11px 18px;border-radius:10px;font-size:.85rem;z-index:60;
+  box-shadow:0 12px 40px -12px rgba(0,0,0,.8);
+  border:1px solid color-mix(in srgb,var(--text) 8%,transparent);
+  animation:toast .2s ease;
+}
+@keyframes toast{from{opacity:0;transform:translate(-50%,8px);}to{opacity:1;transform:translateX(-50%);}}
+
+/* ---------- 状態 ---------- */
+[hidden]{display:none !important;}
+.loading{display:flex;min-height:60vh;align-items:center;justify-content:center;color:var(--muted);}
+
+/* ---------- スマホ ---------- */
+@media (max-width:720px){
+  :root{--bar-h:118px;}
+  .album{
+    grid-template-columns:1fr;justify-items:center;text-align:center;gap:18px;
+  }
+  .album__art{width:min(70vw,300px);}
+  .album__meta{width:100%;}
+  .album__stats{justify-content:center;}
+  .controls{justify-content:center;flex-wrap:wrap;}
+  .controls__share{margin-left:0;}
+  .album__title{font-size:clamp(2.4rem,12vw,3.6rem);}
+
+  .player__row{grid-template-columns:1fr auto;grid-template-areas:"np transport";row-gap:2px;}
+  .np{grid-area:np;}
+  .transport{grid-area:transport;}
+  .player__right{display:none;}        /* スマホは端末の音量＋専用歌詞ボタン */
+  .np__art{width:40px;height:40px;}
+  /* スマホは歌詞ボタンを再生バー左の曲名タップで開く動線にする */
+}
+
+/* スマホで歌詞ボタンを再生バーに常時表示 */
+.np__lyrics{
+  display:none;font-size:.7rem;color:var(--muted);letter-spacing:.08em;margin-top:2px;
+}
+@media (max-width:720px){.np__lyrics{display:block;}}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important;}
+}

@@ -1,0 +1,40 @@
+{
+  "album": "三文抒情",
+  "artist": null,
+  "jacket": "jacket.jpeg",
+  "totalDuration": 609.312,
+  "tracks": [
+    {
+      "name": "天井",
+      "audio": "天井.mp3",
+      "type": "mp3",
+      "lyrics": "天井.txt",
+      "image": null,
+      "duration": 195.672
+    },
+    {
+      "name": "灰色",
+      "audio": "灰色.mp3",
+      "type": "mp3",
+      "lyrics": "灰色.txt",
+      "image": null,
+      "duration": null
+    },
+    {
+      "name": "吐息",
+      "audio": "吐息.mp3",
+      "type": "mp3",
+      "lyrics": "吐息.txt",
+      "image": null,
+      "duration": 231.816
+    },
+    {
+      "name": "君は詩人になった",
+      "audio": "君は詩人になった.mp3",
+      "type": "mp3",
+      "lyrics": "君は詩人になった.txt",
+      "image": null,
+      "duration": 181.824
+    }
+  ]
+}
