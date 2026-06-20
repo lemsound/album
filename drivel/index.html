@@ -11,6 +11,16 @@
 <!-- OGP（共有時のカード表示用。jacket をサムネに使う） -->
 <meta property="og:type" content="music.album">
 <meta property="og:title" content="三文抒情">
+<meta property="og:site_name" content="三文抒情">
+<meta property="og:description" content="アルバム『三文抒情』を聴く。ブラウザでそのまま再生できます。">
+<meta property="og:url" content="https://lemsound.github.io/album/drivel/">
+<meta property="og:image" content="https://lemsound.github.io/album/drivel/jacket.jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="三文抒情">
+<meta name="twitter:description" content="アルバム『三文抒情』を聴く。ブラウザでそのまま再生できます。">
+<meta name="twitter:image" content="https://lemsound.github.io/album/drivel/jacket.jpeg">
 <!-- 自己修復：古いキャッシュ等で画面が出ないとき、一度だけ掃除して再読み込み -->
 <script>
 (function(){
@@ -56,7 +66,13 @@
   <symbol id="i-loop" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M17 3.5 20.5 7 17 10.5M20.5 7H8.5A4.5 4.5 0 0 0 4 11.5M7 20.5 3.5 17 7 13.5M3.5 17h12A4.5 4.5 0 0 0 20 12.5"/></symbol>
   <symbol id="i-loop1" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M17 3.5 20.5 7 17 10.5M20.5 7H8.5A4.5 4.5 0 0 0 4 11.5M7 20.5 3.5 17 7 13.5M3.5 17h12A4.5 4.5 0 0 0 20 12.5"/><text x="12" y="14.5" font-size="8" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text></symbol>
   <symbol id="i-share" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M18 8a2.5 2.5 0 1 0-2.45-3M6 14.5A2.5 2.5 0 1 0 6 9.5a2.5 2.5 0 0 0 0 5ZM18 21a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM8.2 11.3l7.6-3.6M8.2 13.2l7.6 3.5"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M12 4v10m0 0 4-4m-4 4-4-4M5 18.5h14"/></symbol>
+  <symbol id="i-muted" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M16.5 9.5l5 5m0-5l-5 5"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M16.5 8.5a5 5 0 0 1 0 7"/></symbol>
   <symbol id="i-lyrics" viewBox="0 0 24 24"><rect x="3.6" y="3.6" width="16.8" height="16.8" rx="3.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M7.2 8.4h7M7.2 11.6h7M7.2 14.8h3.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M13.4 17.8v-3.3l4.2-1.05v3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="12.5" cy="17.8" r="1.45" fill="currentColor"/><circle cx="16.7" cy="16.55" r="1.45" fill="currentColor"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M12 3v11m0 0 4.2-4.2M12 14 7.8 9.8M5 20.2h14"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M16.5 8.5a5 5 0 0 1 0 7"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="m16.5 9.5 5 5m0-5-5 5"/></symbol>
 </svg>
 
 <div id="app">
@@ -87,6 +103,9 @@
           <button class="btn btn--icon" id="lyricsToggle" aria-label="歌詞" title="歌詞">
             <svg aria-hidden="true"><use href="#i-lyrics"></use></svg>
           </button>
+          <button class="btn btn--icon controls__download" id="albumDownload" aria-label="アルバムをダウンロード" title="アルバムをダウンロード">
+            <svg aria-hidden="true"><use href="#i-download"></use></svg>
+          </button>
           <button class="btn btn--icon controls__share" id="share" aria-label="リンクを共有" title="リンクを共有">
             <svg aria-hidden="true"><use href="#i-share"></use></svg>
           </button>
@@ -110,6 +129,9 @@
   <div class="player" id="player" hidden>
     <div class="player__inner">
       <div class="player__seek">
+        <button class="track-dl" id="trackDownload" aria-label="この曲をダウンロード" title="この曲をダウンロード" hidden>
+          <svg aria-hidden="true"><use href="#i-download"></use></svg>
+        </button>
         <span class="time" id="cur">0:00</span>
         <input class="seek" id="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="再生位置">
         <span class="time time--end" id="dur">0:00</span>
@@ -128,11 +150,21 @@
         </div>
         <div class="player__right">
           <span class="vol-wrap">
-            <svg class="vol-ico" aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M16.5 8.5a5 5 0 0 1 0 7"/></svg>
+            <button class="vol-ico" id="muteBtn" aria-label="ミュート" title="ミュート">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><use href="#i-vol"></use></svg>
+            </button>
             <input class="vol" id="vol" type="range" min="0" max="1" step="0.01" value="1" aria-label="音量">
           </span>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal__x" id="modalX" aria-label="閉じる"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <h2 class="modal__title" id="modalTitle"></h2>
+      <div class="modal__body" id="modalBody"></div>
     </div>
   </div>
 
