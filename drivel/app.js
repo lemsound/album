@@ -45,7 +45,7 @@ async function fetchText(url){
 
 /* ---------- 設定ファイル解析 ---------- */
 function parseDesign(text){
-  const cfg = {colors:{}, year:null, albumFont:'明朝', lyricsFont:'明朝', perSong:{}};
+  const cfg = {colors:{}, year:null, albumFont:'明朝', lyricsFont:'明朝', albumTitleSize:null, perSong:{}};
   text.replace(/\r\n?/g,'\n').split('\n').forEach(raw=>{
     const line = raw.trim();
     if(!line || line.startsWith('#')) return;
@@ -62,6 +62,7 @@ function parseDesign(text){
       case '淡色':   cfg.colors['--muted'] = val; break;
       case 'リリース年': cfg.year = val; break;
       case 'アルバム名': if(FONT_STACK[val]) cfg.albumFont = val; break;
+      case 'アルバム名サイズ': cfg.albumTitleSize = val; break;
       case '歌詞':       if(FONT_STACK[val]) cfg.lyricsFont = val; break;
       default:
         if(key.startsWith('歌詞@') && FONT_STACK[val]){
@@ -167,6 +168,14 @@ function applyDesign(){
   ensureFont(design.lyricsFont);
   root.setProperty('--font-album', FONT_STACK[design.albumFont]);
   root.setProperty('--font-lyrics', FONT_STACK[design.lyricsFont]);
+
+  // アルバム名サイズ（数字だけなら rem 扱い。スマホは画面幅で頭打ち）
+  if(design.albumTitleSize){
+    let v = String(design.albumTitleSize).trim();
+    if(/^[\d.]+$/.test(v)) v = v + 'rem';
+    root.setProperty('--album-title-size', v);
+    root.setProperty('--album-title-size-m', `min(${v}, 11vw)`);
+  }
 }
 
 function buildTracks(){
@@ -225,7 +234,12 @@ function renderHeader(){
     art.classList.add('album__art--empty');
     art.textContent = '♪';
   }
-  $('credit').textContent = `${manifest.album}${manifest.artist? ' — '+manifest.artist : ''}`;
+  // og:url（共有カード用）
+  document.querySelector('meta[property="og:url"]')?.remove();
+  const ogu = document.createElement('meta');
+  ogu.setAttribute('property','og:url');
+  ogu.setAttribute('content', location.origin + location.pathname);
+  document.head.appendChild(ogu);
 }
 
 function renderList(){
@@ -280,6 +294,7 @@ let phase = 'idle';            // 'lead' | 'audio' | 'trail' | 'idle'
 let phaseStart = 0;            // performance.now() 起点（無音フェーズ用）
 let phaseConsumed = 0;         // 一時停止時に消費済みの無音秒数
 let rafId = 0;
+let seeking = false;           // ユーザーがシークバーを操作中か
 
 function onTrackClick(i){
   if(i === cur){ togglePlay(); return; }
@@ -306,7 +321,8 @@ function select(i, autoplay){
   setSeek(0);
   syncLyricsIfOpen();
   markCurrent();
-  history.replaceState(null,'', linkFor(t));   // アドレスを今の曲に追従（共有用）
+  // ※ 再生中もURLは書き換えない（リロードしたら初期画面に戻すため）。
+  //   共有は share() のときだけ ?t=曲名 付きリンクを作る。
 
   if(!t.playable){
     showToast('この曲はまだ音源が入っていません');
@@ -416,8 +432,10 @@ function tick(){
   }
 
   const P = currentP();
-  $('cur').textContent = fmt(P);
-  setSeek(sh.eff ? P/sh.eff*1000 : 0);
+  if(!seeking){                       // 操作中はユーザーの指に任せる
+    $('cur').textContent = fmt(P);
+    setSeek(sh.eff ? P/sh.eff*1000 : 0);
+  }
   rafId = requestAnimationFrame(tick);
 }
 
@@ -471,6 +489,12 @@ function setPlayIcon(on){
   const use = $('play').querySelector('use');
   use.setAttribute('href', on ? '#i-pause' : '#i-play');
   $('play').setAttribute('aria-label', on ? '一時停止' : '再生');
+  // 上部のアルバム再生ボタンも同期
+  const pa = $('playAll');
+  if(pa){
+    pa.querySelector('use').setAttribute('href', on ? '#i-pause' : '#i-play');
+    pa.setAttribute('aria-label', on ? '一時停止' : '再生');
+  }
 }
 function setSeek(v){
   const s = $('seek'); s.value = v;
@@ -579,26 +603,46 @@ function bindUI(){
   $('next').addEventListener('click', ()=> next(false));
   $('prev').addEventListener('click', prev);
   $('lyricsToggle').addEventListener('click', ()=> $('lyrics').hidden ? openLyrics() : closeLyrics());
-  $('npLyrics').addEventListener('click', openLyrics);
   $('lyricsClose').addEventListener('click', closeLyrics);
 
-  // シーク
+  // シーク（操作中は seeking=true にして、tick の上書きを止める）
   const seek = $('seek');
-  let seeking = false;
-  const seekTo = ()=>{
+  const previewSeek = ()=>{
     if(cur < 0) return;
     const sh = tracks[cur].shape;
+    $('cur').textContent = fmt(seek.value/1000 * sh.eff);
+    setSeek(seek.value);
+  };
+  const commitSeek = ()=>{
+    if(cur < 0){ seeking = false; return; }
+    const sh = tracks[cur].shape;
     const P = seek.value/1000 * sh.eff;
-    $('cur').textContent = fmt(P);
     setSeek(seek.value);
     seekToP(P, isPlaying);
     if(isPlaying) startRAF();
+    seeking = false;
+    seek.classList.remove('is-seeking');
   };
-  seek.addEventListener('input', ()=>{ seeking = true; if(cur>=0){ const sh=tracks[cur].shape; $('cur').textContent = fmt(seek.value/1000*sh.eff); setSeek(seek.value);} });
-  seek.addEventListener('change', ()=>{ seekTo(); seeking=false; });
+  const startSeek = ()=>{ seeking = true; seek.classList.add('is-seeking'); };
+  // 掴んだ瞬間（マウス／タッチ／ペン）
+  seek.addEventListener('pointerdown', startSeek);
+  seek.addEventListener('keydown', e=>{ if(/Arrow|Home|End|Page/.test(e.key)) startSeek(); });
+  // ドラッグ中は見た目だけ追従
+  seek.addEventListener('input', ()=>{ seeking = true; seek.classList.add('is-seeking'); previewSeek(); });
+  // 離したら確定（change はマウス／タッチ／キー共通で発火）
+  seek.addEventListener('change', commitSeek);
+  // 指やマウスを離したときの保険（change が来ないブラウザ対策）
+  seek.addEventListener('pointerup', ()=>{ if(seeking) commitSeek(); });
+  seek.addEventListener('pointercancel', ()=>{ if(seeking) commitSeek(); });
 
-  // 音量
-  $('vol').addEventListener('input', e=>{ audio.volume = parseFloat(e.target.value); });
+  // 音量（色のfillも更新）
+  const vol = $('vol');
+  const applyVol = ()=>{
+    audio.volume = parseFloat(vol.value);
+    vol.style.setProperty('--vp', (vol.value*100)+'%');
+  };
+  vol.addEventListener('input', applyVol);
+  applyVol();   // 初期fill
 
   // キーボード
   document.addEventListener('keydown', e=>{

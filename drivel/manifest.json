@@ -2,7 +2,7 @@
   "album": "三文抒情",
   "artist": null,
   "jacket": "jacket.jpeg",
-  "totalDuration": 609.312,
+  "totalDuration": 773.4,
   "tracks": [
     {
       "name": "天井",
@@ -18,7 +18,7 @@
       "type": "mp3",
       "lyrics": "灰色.txt",
       "image": null,
-      "duration": null
+      "duration": 164.088
     },
     {
       "name": "吐息",

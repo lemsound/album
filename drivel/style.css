@@ -77,9 +77,9 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
 .album__title{
   font-family:var(--font-album);
   font-weight:700;
-  /* ドデカく */
-  font-size:clamp(2.7rem,8.5vw,5.6rem);
-  line-height:1.04;
+  /* design.txt の「アルバム名サイズ」で上書き。未指定なら下の控えめclamp */
+  font-size:var(--album-title-size, clamp(2.3rem,6.5vw,4.4rem));
+  line-height:1.06;
   letter-spacing:.01em;
   margin:0 0 .18em;
   word-break:break-word;
@@ -128,6 +128,13 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
   color:var(--muted);
 }
 .btn--icon:hover{color:var(--text);background:var(--surface);}
+.btn--text{
+  height:44px;padding:0 16px;border-radius:999px;
+  color:var(--muted);font-size:.86rem;letter-spacing:.04em;gap:.45em;
+}
+.btn--text svg{width:18px;height:18px;}
+.btn--text:hover{color:var(--text);background:var(--surface);}
+.btn--text.is-active{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);}
 .btn--icon[aria-pressed="true"],
 .btn--icon.is-active{color:var(--accent);}
 .btn--icon[aria-pressed="true"]::after,
@@ -172,8 +179,6 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
 .track__bars span:nth-child(3){animation-delay:.4s;}
 @keyframes eq{0%,100%{height:4px;}50%{height:14px;}}
 
-.credit{margin-top:40px;color:var(--muted);font-size:.78rem;letter-spacing:.04em;}
-
 /* ---------- 下部プレイヤー ---------- */
 .player{
   position:fixed;left:0;right:0;bottom:0;z-index:30;
@@ -188,23 +193,28 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
 
 /* シークバー（range を自前スタイル） */
 .seek{
-  -webkit-appearance:none;appearance:none;width:100%;height:16px;background:transparent;cursor:pointer;
+  -webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;cursor:pointer;
+  touch-action:none;   /* スマホで掴んだら横スクロールに取られない */
 }
 .seek::-webkit-slider-runnable-track{
-  height:4px;border-radius:3px;
+  height:6px;border-radius:4px;
   background:linear-gradient(to right,var(--accent) var(--p,0%),
-            color-mix(in srgb,var(--text) 22%,transparent) var(--p,0%));
+            color-mix(in srgb,var(--text) 24%,transparent) var(--p,0%));
 }
-.seek::-moz-range-track{height:4px;border-radius:3px;background:color-mix(in srgb,var(--text) 22%,transparent);}
-.seek::-moz-range-progress{height:4px;border-radius:3px;background:var(--accent);}
+.seek::-moz-range-track{height:6px;border-radius:4px;background:color-mix(in srgb,var(--text) 24%,transparent);}
+.seek::-moz-range-progress{height:6px;border-radius:4px;background:var(--accent);}
 .seek::-webkit-slider-thumb{
-  -webkit-appearance:none;appearance:none;width:12px;height:12px;margin-top:-4px;
-  border-radius:50%;background:var(--text);
-  box-shadow:0 0 6px color-mix(in srgb,var(--accent) 80%,transparent);
-  opacity:0;transition:opacity .12s ease;
+  -webkit-appearance:none;appearance:none;width:15px;height:15px;margin-top:-4.5px;
+  border-radius:50%;background:#fff;border:2px solid var(--accent);
+  box-shadow:0 1px 5px rgba(0,0,0,.45);
+  transition:transform .1s ease;
 }
-.seek:hover::-webkit-slider-thumb,.seek:focus-visible::-webkit-slider-thumb{opacity:1;}
-.seek::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:var(--text);}
+.seek:hover::-webkit-slider-thumb,.seek:active::-webkit-slider-thumb{transform:scale(1.25);}
+.seek::-moz-range-thumb{
+  width:15px;height:15px;border:2px solid var(--accent);border-radius:50%;background:#fff;
+  box-shadow:0 1px 5px rgba(0,0,0,.45);
+}
+.seek.is-seeking::-webkit-slider-thumb{transform:scale(1.25);}
 
 .player__row{
   display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-top:4px;
@@ -225,19 +235,24 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
 }
 .transport__play:hover{background:var(--accent);transform:scale(1.05);}
 .transport__play svg{width:22px;height:22px;}
-.player__right{display:flex;align-items:center;justify-content:flex-end;gap:14px;}
-.lyrics-toggle{
-  font-size:.82rem;color:var(--muted);letter-spacing:.06em;
-  padding:7px 12px;border-radius:999px;
-}
-.lyrics-toggle:hover{color:var(--text);}
-.lyrics-toggle.is-active{color:var(--accent);}
+.player__right{display:flex;align-items:center;justify-content:flex-end;gap:10px;}
+.vol-wrap{display:flex;align-items:center;gap:8px;}
+.vol-ico{width:18px;height:18px;color:var(--muted);flex:0 0 auto;}
 .vol{
-  -webkit-appearance:none;appearance:none;width:84px;height:4px;border-radius:3px;
-  background:color-mix(in srgb,var(--text) 22%,transparent);cursor:pointer;
+  -webkit-appearance:none;appearance:none;width:90px;height:18px;background:transparent;cursor:pointer;
 }
-.vol::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--text);}
-.vol::-moz-range-thumb{width:11px;height:11px;border:0;border-radius:50%;background:var(--text);}
+.vol::-webkit-slider-runnable-track{
+  height:4px;border-radius:3px;
+  background:linear-gradient(to right,var(--accent) var(--vp,100%),
+            color-mix(in srgb,var(--text) 22%,transparent) var(--vp,100%));
+}
+.vol::-moz-range-track{height:4px;border-radius:3px;background:color-mix(in srgb,var(--text) 22%,transparent);}
+.vol::-moz-range-progress{height:4px;border-radius:3px;background:var(--accent);}
+.vol::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:12px;height:12px;margin-top:-4px;
+  border-radius:50%;background:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.4);
+}
+.vol::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:var(--accent);}
 
 /* ---------- 歌詞パネル ---------- */
 .lyrics{
@@ -261,16 +276,17 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
   flex:1;overflow-y:auto;
   max-width:720px;width:100%;margin:0 auto;
   padding:8px clamp(18px,5vw,32px) 40px;
-  /* 列は中央寄せ・文字は左寄せ */
-  text-align:left;
+  /* 文字は左寄せのまま、ブロック自体を画面中央へ */
+  text-align:center;
 }
 .lyrics__inner{
+  display:inline-block;
+  text-align:left;            /* 中身の文字は左揃え */
   font-family:var(--font-lyrics);
   font-size:clamp(1rem,1.05rem + .2vw,1.18rem);
   line-height:2.05;
   letter-spacing:.02em;
   color:color-mix(in srgb,var(--text) 92%,transparent);
-  max-width:30em;margin:0 auto;       /* 中央のカラム、中身は左揃え */
 }
 .lyrics__inner p{margin:0;}
 .lyrics__inner p.blank{height:1.1em;}
@@ -293,30 +309,26 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
 
 /* ---------- スマホ ---------- */
 @media (max-width:720px){
-  :root{--bar-h:118px;}
+  :root{--bar-h:96px;}
+  .screen{padding-bottom:calc(var(--bar-h) + 12px);}   /* リスト下の余白を詰める */
   .album{
     grid-template-columns:1fr;justify-items:center;text-align:center;gap:18px;
   }
   .album__art{width:min(70vw,300px);}
   .album__meta{width:100%;}
   .album__stats{justify-content:center;}
-  .controls{justify-content:center;flex-wrap:wrap;}
+  .controls{justify-content:center;flex-wrap:wrap;gap:10px;}
   .controls__share{margin-left:0;}
-  .album__title{font-size:clamp(2.4rem,12vw,3.6rem);}
+  /* 指定サイズが大きくても画面内に収まるよう上限をかける */
+  .album__title{font-size:var(--album-title-size-m, var(--album-title-size, clamp(2.2rem,10vw,3.2rem)));}
 
+  .player__inner{padding:6px clamp(14px,4vw,28px) 8px;}
   .player__row{grid-template-columns:1fr auto;grid-template-areas:"np transport";row-gap:2px;}
   .np{grid-area:np;}
   .transport{grid-area:transport;}
-  .player__right{display:none;}        /* スマホは端末の音量＋専用歌詞ボタン */
+  .player__right{display:none;}        /* スマホは端末側の音量ボタンを使う */
   .np__art{width:40px;height:40px;}
-  /* スマホは歌詞ボタンを再生バー左の曲名タップで開く動線にする */
 }
-
-/* スマホで歌詞ボタンを再生バーに常時表示 */
-.np__lyrics{
-  display:none;font-size:.7rem;color:var(--muted);letter-spacing:.08em;margin-top:2px;
-}
-@media (max-width:720px){.np__lyrics{display:block;}}
 
 @media (prefers-reduced-motion:reduce){
   *{animation:none !important;transition:none !important;}

@@ -25,6 +25,7 @@
   <symbol id="i-loop" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M17 3.5 20.5 7 17 10.5M20.5 7H8.5A4.5 4.5 0 0 0 4 11.5M7 20.5 3.5 17 7 13.5M3.5 17h12A4.5 4.5 0 0 0 20 12.5"/></symbol>
   <symbol id="i-loop1" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M17 3.5 20.5 7 17 10.5M20.5 7H8.5A4.5 4.5 0 0 0 4 11.5M7 20.5 3.5 17 7 13.5M3.5 17h12A4.5 4.5 0 0 0 20 12.5"/><text x="12" y="14.5" font-size="8" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">1</text></symbol>
   <symbol id="i-share" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M18 8a2.5 2.5 0 1 0-2.45-3M6 14.5A2.5 2.5 0 1 0 6 9.5a2.5 2.5 0 0 0 0 5ZM18 21a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM8.2 11.3l7.6-3.6M8.2 13.2l7.6 3.5"/></symbol>
+  <symbol id="i-lyrics" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M4 6.5h12M4 11h16M4 15.5h9"/></symbol>
 </svg>
 
 <div id="app">
@@ -43,14 +44,17 @@
           <span id="statTotal"></span>
         </p>
         <div class="controls">
-          <button class="btn btn--primary" id="playAll">
-            <svg aria-hidden="true"><use href="#i-play"></use></svg><span>再生</span>
+          <button class="btn btn--primary" id="playAll" aria-label="再生">
+            <svg aria-hidden="true"><use href="#i-play"></use></svg>
           </button>
           <button class="btn btn--icon" id="shuffle" aria-pressed="false" aria-label="シャッフル" title="シャッフル">
             <svg aria-hidden="true"><use href="#i-shuffle"></use></svg>
           </button>
           <button class="btn btn--icon" id="loop" aria-label="ループ：オフ" title="ループ：オフ">
             <svg aria-hidden="true"><use href="#i-loop"></use></svg>
+          </button>
+          <button class="btn btn--text" id="lyricsToggle" aria-label="歌詞" title="歌詞">
+            <svg aria-hidden="true"><use href="#i-lyrics"></use></svg><span>歌詞</span>
           </button>
           <button class="btn btn--icon controls__share" id="share" aria-label="リンクを共有" title="リンクを共有">
             <svg aria-hidden="true"><use href="#i-share"></use></svg>
@@ -60,7 +64,6 @@
     </header>
 
     <ol class="tracks" id="tracklist"></ol>
-    <footer class="credit" id="credit"></footer>
   </main>
 
   <!-- 歌詞パネル -->
@@ -85,7 +88,6 @@
           <img class="np__art" id="npArt" alt="" hidden>
           <div>
             <div class="np__title" id="npTitle"></div>
-            <button class="np__lyrics" id="npLyrics">歌詞をみる</button>
           </div>
         </div>
         <div class="transport">
@@ -94,8 +96,10 @@
           <button id="next" aria-label="次の曲"><svg aria-hidden="true"><use href="#i-next"></use></svg></button>
         </div>
         <div class="player__right">
-          <button class="lyrics-toggle" id="lyricsToggle">歌詞</button>
-          <input class="vol" id="vol" type="range" min="0" max="1" step="0.01" value="1" aria-label="音量">
+          <span class="vol-wrap">
+            <svg class="vol-ico" aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M4 9v6h4l5 4V5L8 9H4z"/><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M16.5 8.5a5 5 0 0 1 0 7"/></svg>
+            <input class="vol" id="vol" type="range" min="0" max="1" step="0.01" value="1" aria-label="音量">
+          </span>
         </div>
       </div>
     </div>

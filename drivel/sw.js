@@ -6,7 +6,7 @@
    ・Webフォント … cache-first
    キャッシュを作り直したいときは下の VERSION を変えてください。
    ========================================================= */
-const VERSION = 'sanmon-jojou-v1';
+const VERSION = 'sanmon-jojou-v2';
 const SHELL = ['./', './index.html', './style.css', './app.js'];
 
 const isMedia  = (u) => /\.(mp3|wav|m4a|ogg|jpg|jpeg|png|webp|gif)$/i.test(u.pathname);
