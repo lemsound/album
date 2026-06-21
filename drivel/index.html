@@ -40,7 +40,9 @@
           }
           if(window.caches){
             jobs.push(caches.keys().then(function(ks){
-              return Promise.all(ks.map(function(k){ return caches.delete(k); }));
+              // 音源(sj-media-*)は残す。壊れがちな本体側だけ消して再ダウンロードを避ける
+              return Promise.all(ks.filter(function(k){ return k.indexOf('sj-media') !== 0; })
+                                   .map(function(k){ return caches.delete(k); }));
             }));
           }
           Promise.all(jobs).then(done, done);

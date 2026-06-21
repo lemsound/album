@@ -17,7 +17,7 @@
    ・音源を差し替えたときは MEDIA_VERSION を上げてください（音源だけ作り直し）。
    ・コードだけ更新したときは VERSION を上げてください（音源は保持されます）。
    ========================================================= */
-const VERSION       = 'sanmon-jojou-v13';   // アプリ本体（コード）の版
+const VERSION       = 'sanmon-jojou-v14';   // アプリ本体（コード）の版
 const MEDIA_VERSION = 'sj-media-v1';        // 音源・画像の版（音源を差し替えた時だけ上げる）
 const SHELL = 'shell-' + VERSION;
 const MEDIA = MEDIA_VERSION;
@@ -26,7 +26,34 @@ const isAudio = (u) => /\.(mp3|wav|m4a|aac|ogg|oga|flac)$/i.test(u.pathname);
 const isImage = (u) => /\.(jpg|jpeg|png|webp|gif|svg|ico)$/i.test(u.pathname);
 const isFont  = (u) => /fonts\.(googleapis|gstatic)\.com$/i.test(u.hostname);
 
-self.addEventListener('install', ()=> self.skipWaiting());
+// オフライン起動に必要な“本体一式”（音源以外）。10分のHTTPキャッシュに頼らず保存する。
+const SHELL_FILES = ['./','index.html','app.js','style.css',
+                     'manifest.json','曲順.txt','design.txt','timing.txt'];
+
+self.addEventListener('install', (e)=>{
+  e.waitUntil((async ()=>{
+    self.skipWaiting();
+    // 本体一式を先に保存（失敗しても起動は妨げない）
+    try{
+      const shell = await caches.open(SHELL);
+      await shell.addAll(SHELL_FILES.map(f=> new Request(f, {cache:'reload'})));
+    }catch(_){}
+    // 歌詞は本体扱い(SHELL)、ジャケット等の画像はMEDIAへ（manifest から取得）
+    try{
+      const m = await (await fetch('manifest.json', {cache:'reload'})).json();
+      const shell = await caches.open(SHELL);
+      const media = await caches.open(MEDIA);
+      const lyrics = (m.tracks||[]).map(t=> t.lyrics).filter(Boolean);
+      const images = [];
+      if(m.jacket) images.push(m.jacket);
+      (m.tracks||[]).forEach(t=>{ if(t.image) images.push(t.image); });
+      await Promise.all([
+        ...lyrics.map(u=> shell.add(new Request(u, {cache:'reload'})).catch(()=>{})),
+        ...images.map(u=> media.add(new Request(u, {cache:'reload'})).catch(()=>{}))
+      ]);
+    }catch(_){}
+  })());
+});
 
 self.addEventListener('activate', (e)=>{
   e.waitUntil((async ()=>{
