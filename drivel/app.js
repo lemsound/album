@@ -983,8 +983,12 @@ function bindUI(){
 /* ---------- サービスワーカー（キャッシュ）---------- */
 function registerSW(){
   if('serviceWorker' in navigator){
-    window.addEventListener('load', ()=>{
-      navigator.serviceWorker.register('sw.js').catch(err=> console.warn('SW登録失敗', err));
-    });
+    // この関数は画面表示後に呼ばれる＝load が既に発火済みのことがある。
+    // load を待つと登録されないので、ここで直接登録する。
+    navigator.serviceWorker.register('sw.js').catch(err=> console.warn('SW登録失敗', err));
+  }
+  // 端末のストレージが圧迫されても、保存した音源を勝手に消されにくくする
+  if(navigator.storage && navigator.storage.persist){
+    navigator.storage.persisted().then(p=>{ if(!p) navigator.storage.persist().catch(()=>{}); }).catch(()=>{});
   }
 }
