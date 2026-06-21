@@ -17,7 +17,7 @@
    ・音源を差し替えたときは MEDIA_VERSION を上げてください（音源だけ作り直し）。
    ・コードだけ更新したときは VERSION を上げてください（音源は保持されます）。
    ========================================================= */
-const VERSION       = 'sanmon-jojou-v14';   // アプリ本体（コード）の版
+const VERSION       = 'sanmon-jojou-v15';   // アプリ本体（コード）の版
 const MEDIA_VERSION = 'sj-media-v1';        // 音源・画像の版（音源を差し替えた時だけ上げる）
 const SHELL = 'shell-' + VERSION;
 const MEDIA = MEDIA_VERSION;

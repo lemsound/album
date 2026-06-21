@@ -413,6 +413,43 @@ function onAudioEnded(){
   if(phase === 'audio') enterTrailOrNext();
 }
 
+/* メタデータが読めたら実測の長さで補正（今かかっている曲に対してのみ）*/
+function onAudioLoadedMeta(){
+  if(cur < 0) return;
+  const t = tracks[cur];
+  if(!t) return;
+  if(isFinite(audio.duration) && audio.duration > 0){
+    t.base = audio.duration;
+    t.shape = shape(t);
+    $('dur').textContent = fmt(t.shape.eff);
+    const el = document.querySelectorAll('.track__dur')[cur];
+    if(el) el.textContent = fmt(t.shape.eff);
+  }
+}
+
+/* 読み込みエラー。曲の「登録あり/なし」(playable) は manifest の長さで決まるので、
+   一時的な失敗ではそれを覆さない。曲切替などの中断(ABORTED)は正常なので黙って無視する。*/
+let _retriedFor = -1;
+function onAudioError(){
+  const err = audio.error;
+  if(!err) return;
+  if(err.code === 1) return;                 // MEDIA_ERR_ABORTED：曲切替などの正常な中断
+  if(cur < 0) return;
+  // 一時的な失敗。今かかっている曲を一度だけ自動で読み直す（playable は落とさない）
+  if(_retriedFor !== cur){
+    _retriedFor = cur;
+    const wasPlaying = isPlaying;
+    setTimeout(()=>{
+      if(cur < 0 || !tracks[cur]) return;
+      audio.src = encodeURI(tracks[cur].audio);
+      audio.load();
+      if(wasPlaying) play();
+    }, 300);
+    return;
+  }
+  showToast('読み込みに失敗しました。もう一度試してください');
+}
+
 function onTrackClick(i){
   if(i === cur){ togglePlay(); return; }
   select(i, true);
@@ -420,6 +457,7 @@ function onTrackClick(i){
 
 function select(i, autoplay){
   cur = i;
+  _retriedFor = -1;
   const t = tracks[i];
   stopRAF();
   clearSilenceTimer();
@@ -452,16 +490,6 @@ function select(i, autoplay){
   // 音源をセット
   audio.src = encodeURI(t.audio);
   audio.load();
-  audio.onloadedmetadata = ()=>{
-    if(isFinite(audio.duration) && audio.duration > 0){
-      t.base = audio.duration;            // 実測で上書き
-      t.shape = shape(t);
-      $('dur').textContent = fmt(t.shape.eff);
-      const el = document.querySelectorAll('.track__dur')[i];
-      if(el) el.textContent = fmt(t.shape.eff);
-    }
-  };
-  audio.onerror = ()=>{ t.playable = false; showToast('音源を読み込めませんでした'); };
 
   updateMediaSession();
   updateDownloadButtons();
@@ -923,6 +951,8 @@ function bindUI(){
   // 背景でも曲送りするための音声イベント＋ロック画面操作
   audio.addEventListener('timeupdate', onTimeUpdate);
   audio.addEventListener('ended', onAudioEnded);
+  audio.addEventListener('loadedmetadata', onAudioLoadedMeta);
+  audio.addEventListener('error', onAudioError);
   setupMediaSession();
   updateMuteIcon();
 
