@@ -507,6 +507,42 @@ function play(){
   markCurrent();
   startRAF();
   updateMediaSession();
+  schedulePrefetch();   // 聴き始めたら、残りの曲も背景でオフライン用にためる
+}
+
+/* 全曲を背景で先読みしてキャッシュ（オフライン用）。
+   ・WiFi/有線/PC などでは全曲。モバイルデータやデータセーバー時は控える（再生した曲だけ保存）。
+   ・一度だけ。・すでに保存済みの曲は取得しない（通信を増やさない）。 */
+let _prefetchStarted = false;
+function isMobileUA(){ return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
+function shouldPrefetchAll(){
+  const c = navigator.connection;
+  if(c && c.saveData) return false;                 // データセーバーON → 控える
+  if(c && c.type){                                  // 回線種別が分かる端末（Android Chrome等）
+    return c.type !== 'cellular';                   // モバイルデータ以外（WiFi/有線）なら全曲
+  }
+  // 回線種別が不明：iOS等は判別できないので、モバイル端末は安全側（再生した曲だけ）
+  return !isMobileUA();                             // PC等は全曲
+}
+function schedulePrefetch(){
+  if(_prefetchStarted) return;
+  if(!shouldPrefetchAll()) return;                  // モバイルデータ等では先読みしない
+  _prefetchStarted = true;
+  setTimeout(prefetchAllAudio, 4000);               // 今の曲のキャッシュを先に進ませてから
+}
+async function prefetchAllAudio(){
+  const urls = tracks.filter(t=> t.playable).map(t=> new URL(encodeURI(t.audio), location.href).href);
+  // 今の曲を最後に回す（すでに再生で取得が進んでいるため）
+  const curUrl = (cur >= 0 && tracks[cur]) ? new URL(encodeURI(tracks[cur].audio), location.href).href : null;
+  const ordered = urls.filter(u=> u !== curUrl).concat(curUrl ? [curUrl] : []);
+  for(const u of ordered){
+    try{
+      const hit = await caches.match(u);
+      if(hit) continue;                       // 保存済みは飛ばす
+      await fetch(u, {credentials:'same-origin'});   // SWが全体を保存
+    }catch(_){ /* オフライン等は無視 */ }
+    await new Promise(r=> setTimeout(r, 600)); // 帯域を独占しないよう間隔をあける
+  }
 }
 
 function pause(){
